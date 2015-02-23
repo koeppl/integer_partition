@@ -18,25 +18,23 @@
 
 #include <cassert>
 #include "binomial.hpp"
-namespace IntervalPartition
-{
+#include "glog/logging.h"
+
+namespace IntervalPartition {
 
 const Binomial Binomial::b(BINOMIAL_DIM);
 
 
-const Z& Binomial::operator()(size_t i, size_t j) const
-{
-	assert(i < dimension);
+const Z& Binomial::operator()(size_t i, size_t j) const {
+	DCHECK_LT(i,  dimension);
 	if(j > i) return zero;
 	return binomials[i][j];
 }
 
 }//namespace
 
-std::ostream& operator<<(std::ostream& os, const IntervalPartition::Binomial& b)
-{
-	for(size_t i = 0; i < b.dimension; ++i)
-	{
+std::ostream& operator<<(std::ostream& os, const IntervalPartition::Binomial& b) {
+	for(size_t i = 0; i < b.dimension; ++i) {
 		os << "(";
 		for(size_t j = 0; j <= i; ++j)
 			os << b(i,j) << " ";

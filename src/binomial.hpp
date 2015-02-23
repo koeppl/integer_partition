@@ -15,6 +15,13 @@
  * You should have received a copy of the GNU General Public License along
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+/**
+ * @file binomial.hpp
+ * @brief Pre-computes the binomial coefficients
+ * @author Dominik Köppl
+ * 
+ * @date 2015-02-23
+ */
 #ifndef BINOMIAL_HPP
 #define BINOMIAL_HPP
 #include "definitions.hpp"
@@ -22,12 +29,18 @@
 namespace IntervalPartition
 {
 
+	// TODO: exchange with mpz_bin_uiui (mpz_t rop, unsigned long int n, unsigned long int k) ?
+	
+
+	/** 
+	 *  Stores the binomial coefficients in a two-dimensional array.
+	 *  It is like Pascal's triangle, but the rows are "left-aligned".
+	 */
 	class Binomial
 	{
 		public:
-			const size_t dimension;
-			~Binomial()
-			{
+			const size_t dimension; //<! the number of rows
+			~Binomial() {
 				for(size_t i = 0; i < dimension+1; ++i)
 					delete [] binomials[i];
 				delete binomials;
@@ -35,8 +48,7 @@ namespace IntervalPartition
 			Binomial(size_t _dimension) 
 				: dimension(_dimension), binomials(new Z*[dimension+1]), zero(0)
 			{
-				for(size_t i = 0; i < dimension+1; ++i)
-				{
+				for(size_t i = 0; i < dimension+1; ++i) {
 					binomials[i] = new Z[i+1];
 					binomials[i][0] = 1;
 				}
@@ -44,7 +56,14 @@ namespace IntervalPartition
 				for(size_t j = 1; j <= i; ++j)
 					binomials[i][j] = binomials[i-1][j-1] + binomials[i-1][j]; //TODO: binomials[][j] wrt. j symmetric! -> 1/2 space sufficient
 			}
-			const static Binomial b;
+			const static Binomial b; //<! singleton instance
+
+			/** 
+			 * @param i must be less than dimension
+			 * @param j any number is valid (out of bounds are catched by returning zero)
+			 * 
+			 * @return \$f i \choose j \$f
+			 */
 			const Z& operator()(size_t i, size_t j) const;
 		private:
 			Z**const binomials;

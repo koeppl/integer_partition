@@ -17,37 +17,32 @@
  */
 #include "intervalled_polynom.hpp"
 #include "polynom.hpp"
+#include <glog/logging.h>
 
 template<class T>
-std::ostream& operator<<(std::ostream& os, const std::vector<T>& v)
-{
+std::ostream& operator<<(std::ostream& os, const std::vector<T>& v) {
 	os << "(";
-	for(size_t i = 0; i < v.size(); ++i)
-	{
+	for(size_t i = 0; i < v.size(); ++i) {
 		os << v[i] << " ";
 	}
 	os << ")";
 	return os;
 }
 
-namespace IntervalPartition
-{
+namespace IntervalPartition {
 
-bool IntervalledPolynom::operator==(IntervalledPolynom& o)
-{
-	for(size_t i = 0; i < intervalbounds.size(); ++i)
-		if(intervalbounds != o.intervalbounds)
-		{
-			DEBUG_MSG("intervalbounds not the same: " << intervalbounds[i] << " <-> " << o.intervalbounds[i]);
+bool IntervalledPolynom::operator==(IntervalledPolynom& o) {
+	for(size_t i = 0; i < intervalbounds.size(); ++i) {
+		if(intervalbounds != o.intervalbounds) {
+			LOG(INFO) << "intervalbounds not the same: " << intervalbounds[i] << " <-> " << o.intervalbounds[i];
 			return false;
 		}
-	for(size_t i = 0; i < intervalbounds.size(); ++i)
-	{
+	}
+	for(size_t i = 0; i < intervalbounds.size(); ++i) {
 		polynoms[i].canonicalize();
 		o.polynoms[i].canonicalize();
-		if(polynoms[i] != o.polynoms[i]) 
-		{
-			DEBUG_MSG("Polynoms not the same: " << polynoms[i] << " <-> " << o.polynoms[i]);
+		if(polynoms[i] != o.polynoms[i]) {
+			LOG(INFO) << "Polynoms not the same: " << polynoms[i] << " <-> " << o.polynoms[i];
 			return false;
 		}
 	}
@@ -56,15 +51,14 @@ bool IntervalledPolynom::operator==(IntervalledPolynom& o)
 const Polynom& IntervalledPolynom::at(const IB& point) const
 {
 	if(point < 0) return Polynom::zero;
-	DEBUG_MSG("Search " << point << " in " << intervalbounds);
+	LOG(INFO) <<  "Search " << point << " in " << intervalbounds;
 	vektor<IB>::const_iterator it = lower_bound(intervalbounds.begin(), intervalbounds.end(), point);
-	if(it != intervalbounds.end() && *it >= point)
-	{
+	if(it != intervalbounds.end() && *it >= point) {
 		const size_t distance = std::distance(intervalbounds.begin(),it);
-		DEBUG_MSG("Found " << intervalbounds[distance] << "->" << polynoms[distance]);
+		LOG(INFO) << "Found " << intervalbounds[distance] << "->" << polynoms[distance];
 		return polynoms[distance];
 	}
-	DEBUG_MSG("Search failed !");
+	LOG(INFO) << "Search failed !";
 	return Polynom::zero;
 }
 

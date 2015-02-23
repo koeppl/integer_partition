@@ -18,62 +18,12 @@
 
 #include <cstdio>
 #include <cstdlib>
+#include <cassert>
 #include <iostream>
-#include <ctime>
+#include <ctime> // needed?
 #include <gmpxx.h>
-
-typedef mpz_class Z;
-
-Z min(Z i, Z j){
-    if(i<j) return i;
-    return j;
-}
-
-
-Z height(unsigned long* bounds, int left, int right){
-    Z height = 1;
-    for(int i = left; i<=right; i++){
-        height += bounds[i];
-    }
-    return height;
-}
-
-Z width(unsigned long* bounds, Z v, int left, int right){
-    Z i = 0;
-    Z btgwidth = 0;
-    Z btgheight = height(bounds, left, right);
-    if(v==0 || v==(btgheight-1)){
-        return 1;
-    }
-
-    if(v<0 || v>=(btgheight)){
-        return 0;
-    }
-
-    if((right-left)==0){
-        return 1;
-    }
-
-    if((right-left)==1){
-        Z minimum = min(bounds[left], bounds[right]);
-        Z half = (bounds[left]+bounds[right])/2;
-        if(v<=minimum){
-            return v + 1;
-        } else if(minimum < v && v <= half){
-            return (min(bounds[left], bounds[right]) + 1);
-        } else {
-            return width(bounds, btgheight - 1 - v, left, right);
-        }
-    }
-
-    if((right - left) > 1){
-        int split = (right + left)/2;
-        for(i=0; i<=v; i++){
-            btgwidth += width(bounds, i, left, split)*width(bounds, v - i, split + 1, right);
-        }
-    }
-    return btgwidth;
-}
+#include <algorithm>
+#include "naive.hpp"
 
 int main(int argc, char** argv)
 {
@@ -85,10 +35,10 @@ int main(int argc, char** argv)
 	}
 	const size_t bsize = argc-2;
 	const unsigned long z = strtoul(argv[1], NULL, 10);
-    unsigned long*const bounds = new unsigned long[bsize];
+    unsigned int*const bounds = new unsigned int[bsize];
 	for(size_t i = 2; i < static_cast<size_t>(argc); ++i)
 		bounds[i-2] = strtoul(argv[i], NULL, 10);
-	std::cout << width(bounds, z, 0, bsize-1) << std::endl;
+	std::cout << naive_bounds<mpz_class >(bounds, z, 0, bsize-1) << std::endl;
 	delete [] bounds;
 	return 0;
 }

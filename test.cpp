@@ -25,6 +25,10 @@
 
 using namespace IntervalPartition;
 
+/**
+ * Wrapper around gmp for creating random variables.
+ *
+ */
 class Random
 {
 	gmp_randstate_t r_state;
@@ -46,7 +50,9 @@ class Random
 	}
 };
 
-
+/**
+ * Calculates n!
+ */
 Z fact(unsigned int n)
 {
 	 if(n < 2) return 1;
@@ -54,6 +60,9 @@ Z fact(unsigned int n)
 	 while(n-- > 1) result *= n;
 	 return result;
 }
+/**
+ * Calculates value^n
+ */
 Q powerOf(Q value, unsigned int n)
 {
 	 if(n == 0) return 1;
@@ -61,6 +70,9 @@ Q powerOf(Q value, unsigned int n)
 	 while(--n > 0) result *= value;
 	 return result;
 }
+/**
+ * Calculates \f$k \choose j\f$
+ */
 Q choose(unsigned int k, unsigned int j)
 {
 	 return Q(fact(k), fact(j) * fact(k-j));
@@ -69,7 +81,7 @@ Q choose(unsigned int k, unsigned int j)
 /**
  * Evaluate the sum without using Faulhaber's formula,
  * e.g. iterating over the sum
- * Thus it's a barefoot approach without any technique
+ * Thus it's a naive approach without any technique
  */
 Z barefoot(const IB& n, const unsigned int& p)
 {
@@ -82,7 +94,9 @@ Z barefoot(const IB& n, const unsigned int& p)
 	}
 	return res;
 }
-
+/**
+ * Calculates \f$\sum_{k=0}^{\text{upper}} p(k)\f$
+ */
 Q sumFromZeroToUpperTest(const Polynom& p, const Z& upper)
 {
 	Q ret;
@@ -91,6 +105,10 @@ Q sumFromZeroToUpperTest(const Polynom& p, const Z& upper)
 	return ret;
 }
 
+/**
+ * Calculates \f$\sum_{k=z-\gamma}^{\text{upper}} p(k)\f$ naively
+ *
+ */
 Q sumFromZMinusGammaToUpperTest(const Polynom& p, const Z& gamma, const Z& upper, const Z& z)
 {
 	Q ret;
@@ -178,7 +196,9 @@ int main(void)
 
 	// TESTS
 	
-	for(size_t x = 2; x < 100; ++x)
+	/** Testing \class Polynom
+	 */
+	for(size_t x = 2; x < 10; ++x)
 	for(size_t gamma = 0; gamma < x; ++gamma)
 	for(size_t upper = x-gamma+1; upper < 100; ++upper)
 	for(size_t p = 1; p < 20; ++p)
@@ -193,6 +213,8 @@ int main(void)
 	}	
 
 
+	/** Testing \class Binomial
+	 */
 	for(size_t i = 1; i < Binomial::b.dimension; ++i)
 	for(size_t j = 0; j < i; ++j)
 	{

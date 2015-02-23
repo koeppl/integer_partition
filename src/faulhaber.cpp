@@ -18,9 +18,15 @@
 #include "faulhaber.hpp"
 #include "binomial.hpp"
 #include <cassert>
+#include <glog/logging.h>
 
 namespace IntervalPartition
 {
+
+/** 
+ * Generates "naively" the Bernoulli numbers by using \class Binomial 
+ * that pre-caches the Binomial coefficients
+ */
 class Bernoulli
 {
 	public:
@@ -28,26 +34,23 @@ class Bernoulli
 		Bernoulli(const Binomial& binomial, size_t _dimension)
 			: dimension(_dimension), bernoulli(new Q[dimension])
 		{
-			assert(binomial.dimension > dimension+1);
+			DCHECK_GT(binomial.dimension, dimension+1);
 			bernoulli[0] = Q(1,1);
 			bernoulli[1] = Q(-1,2);
 			for(size_t i = 2; i < dimension; ++i)
 			{
 				bernoulli[i] = 0;
-				for(size_t j = 0; j < i; ++j)
-				{
+				for(size_t j = 0; j < i; ++j) {
 					bernoulli[i] -= bernoulli[j] * binomial(i+1,i+1-j);
 				}
 				bernoulli[i] /= i+1;
 			}
 		}
-		~Bernoulli()
-		{
+		~Bernoulli() {
 			delete [] bernoulli;
 		}
-		Q operator[](size_t i) const
-		{
-			assert(i < dimension);
+		Q operator[](size_t i) const {
+			DCHECK_LT(i, dimension);
 			return bernoulli[i];
 		}
 		const static Bernoulli b;
@@ -58,11 +61,9 @@ const Bernoulli Bernoulli::b(Binomial::b, BERNOULLI_DIM);
 }//namespace
 
 
-std::ostream& operator<<(std::ostream& os, const IntervalPartition::Bernoulli& b)
-{
+std::ostream& operator<<(std::ostream& os, const IntervalPartition::Bernoulli& b) {
 	os << "Bernoulli {";
-	for(size_t i = 0; i < b.dimension; ++i)
-	{
+	for(size_t i = 0; i < b.dimension; ++i) {
 		os << b[i] << " ";
 	}
 	os << "}";
@@ -78,7 +79,8 @@ const Faulhaber Faulhaber::f(FAULHABER_DIM);
 Faulhaber::Faulhaber(size_t _dimension)
 	: dimension(_dimension), polynoms(new Polynom[dimension])
 {
-	assert(BINOMIAL_DIM > dimension+2 && BERNOULLI_DIM > dimension+1);
+	DCHECK_GT(BINOMIAL_DIM, dimension+2);
+	DCHECK_GT(BERNOULLI_DIM, dimension+1);
 	for(size_t p = 0; p < dimension; ++p)
 	{
 		polynoms[p].resize(p+2);
@@ -95,7 +97,7 @@ Faulhaber::Faulhaber(size_t _dimension)
 
 const Polynom& Faulhaber::operator()(size_t i) const
 {
-	assert(i < dimension);
+	DCHECK_LT(i, dimension);
 	return polynoms[i];
 }
 

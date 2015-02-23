@@ -18,6 +18,7 @@
 include(CMakeListsFiles.txt)
 add_library(integer_partition SHARED ${integer_partition_SRCS})
 target_link_libraries(integer_partition ${GMP_LIBRARY} ${GMPXX_LIBRARY})
+target_link_libraries(integer_partition ${GLOG_LIBRARY})
 
 add_library(integer_partition_static STATIC ${integer_partition_SRCS})
 set_target_properties(integer_partition_static PROPERTIES OUTPUT_NAME integer_partition)

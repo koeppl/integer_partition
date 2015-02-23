@@ -15,6 +15,13 @@
  * You should have received a copy of the GNU General Public License along
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+/**
+ * @file polynom.hpp
+ * @brief Polynom Functional
+ * @author Dominik Köppl
+ * 
+ * @date 2015-02-23
+ */
 #ifndef POLYNOM_HPP
 #define POLYNOM_HPP
 #include "definitions.hpp"
@@ -22,12 +29,25 @@
 namespace IntervalPartition
 {
 
+	/** 
+	 * Uses std::vector for storing the coefficients.
+	 * Overloads operator() for evaluationg the polynom at any point.
+	 */
 	class Polynom : public vektor<Q>
 	{
 		public:
-		Polynom(size_t _size) : vektor<Q>(_size) {}
+
+			/** 
+			 * Creates an empty polynom, i.e., all coefficienst are set to zero.
+			 * @param psize Creates a polynom with psize coefficients
+			 */
+		Polynom(size_t psize) : vektor<Q>(psize) {}
 		Polynom(const Polynom& pol) : vektor<Q>(pol) {}
 		Polynom() : vektor<Q>() {}
+
+		/**
+		 * Evaluates the polynom at position x
+		 */
 		Q operator()(const Q& x) const
 		{
 			Q res = at(size()-1);
@@ -36,12 +56,17 @@ namespace IntervalPartition
 			mpq_canonicalize(res.get_mpq_t());
 			return res;
 		}
+		/**
+		 * Canonicalizes the coefficients of the polynom.
+		 * These could be unnecessarily great, because gnump does not 
+		 * refactor rational numbers automatically.
+		 */
 		void canonicalize()
 		{
 			while(back() == 0) pop_back();
 			for(Q& coeff : *this) mpq_canonicalize(coeff.get_mpq_t());
 		}
-		const static Polynom zero;
+		const static Polynom zero; //!< the polynom with 0 as coefficient
 	};
 	std::ostream& operator<<(std::ostream& os, const Polynom& v);
 }

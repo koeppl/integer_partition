@@ -34,6 +34,10 @@ std::ostream& operator<<(std::ostream& os, const std::vector<T>& v)
 namespace IntervalPartition
 {
 
+	/** 
+	 * The first term of the proof from Theorem 4.7
+	 * It is computed by the complete sum to the upper bound minus the sum from $0$ to $z-\gamma$.
+	 */
 	Polynom sumFromZMinusGammaToUpper(const Polynom& p, const Z& gamma, const Z& upper)
 	{
 		Q highest = SumFromZeroToUpper::s(p)(upper);
@@ -44,9 +48,23 @@ namespace IntervalPartition
 		return diff;
 	}
 
+	/**
+	 * Generates an intervalled polynom based on the interval bounds given as parameter
+	 * @pre \code length(dimensional_upper_bounds) == dimensions \endcode has to hold.
+	 */
 	IntervalledPolynom generateIntervalPartition(const unsigned int* const dimensional_upper_bounds, const size_t dimensions)
 	{
 		DEBUG_MSG("Interval Partitioning started");
+#ifndef NDEBUG
+		for(size_t i = 0; i < dimensions; ++i) {
+			DCHECK_GT(dimensional_upper_bounds[i], 0);
+
+
+		}
+#endif
+		/**
+		 * Every dimension has to be > 0!
+		*/
 
 	//	vektor<std::pair<vektor<unsigned int>, vektor<unsigned int> > solution;
 		vektor<IB> intervalbounds;
@@ -58,7 +76,7 @@ namespace IntervalPartition
 			Polynom pol(1);
 			pol[0] = 1;
 			intervalledPolynom.push_back(dimensional_upper_bounds[0], pol);
-		}
+		}//! This is exactly the induction base of Theorem 4.7
 
 		for(size_t k = 1; k < dimensions; ++k)
 		{
@@ -70,8 +88,8 @@ namespace IntervalPartition
 			for(const IB& old_intervalbound : intervalbounds)
 				help_intervalbounds.push_back(old_intervalbound + dimensional_upper_bounds[k]);
 
-			vektor<IB> tmp_intervalbounds;
-			IntervalledPolynom tmp_intervalledPolynom;
+			vektor<IB> tmp_intervalbounds; //! in this array the interval bounds of the next round (k+1) will be stored
+			IntervalledPolynom tmp_intervalledPolynom; //! this will be the polynom of the next round (k+1)
 
 			
 			for(size_t i = 0, j = 0, witness_left = 0, witness_right = 0, last_upper_bound_index = 0, last_lower_bound_index = 0; j < help_intervalbounds.size();)
@@ -261,6 +279,7 @@ namespace IntervalPartition
 					DEBUG_MSG("Upper Sum: " << upper_sum);
 
 					Polynom together(std::max(upper_sum.size(), lower_sum.size())+1);
+					//TODO: unnecessary complicated!
 					for(size_t l = 0; l < together.size(); ++l)
 					{
 						if(l < lower_sum.size()) together[l] += lower_sum[l];

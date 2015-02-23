@@ -15,13 +15,38 @@
  * You should have received a copy of the GNU General Public License along
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+/**
+ * @file interval_partition.hpp
+ * @brief Returns a piecewise-defined polynomial that evaluates for a given integer z the number of partitions of z.
+ * @author Dominik Köppl
+ * 
+ * @date 2015-02-23
+ *
+ */
 #ifndef INTERVALL_PARTITION
 #define INTERVALL_PARTITION
 #include "intervalled_polynom.hpp"
 
-namespace IntervalPartition
-{
+/**
+ * Ordered Integer Partition with Upper Bounds Library
+ */
+namespace IntervalPartition {
+	/** 
+	 * Returns a piecewise-defined polynomial that evaluates for a given integer z the number of partitions of z.
+	 * 
+	 * @param dimensional_upper_bounds The upper bounds. Note that each value has to be strictly larger than 0.
+	 * Otherwise, please drop this dimension!
+	 * @param dimensions The length of dimensional_upper_bounds
+	 * 
+	 * @return A polynom that answers the integer partition problem for any z in linear time.
+	 */
 	IntervalledPolynom generateIntervalPartition(const unsigned int* const dimensional_upper_bounds, const size_t dimensions);
+
+	/** 
+	 * Computes \f$ \sum_{k = z - \gamma}^{upper} p(k) \f$
+	 * 
+	 * @return the polynom resulting by the summation
+	 */
 	Polynom sumFromZMinusGammaToUpper(const Polynom& p, const Z& gamma, const Z& upper);
 }
 #endif//guard

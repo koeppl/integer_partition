@@ -15,6 +15,14 @@
  * You should have received a copy of the GNU General Public License along
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+/** 
+ * @file definitions.hpp
+ * @brief Definitions used across the library
+ * @author Dominik Köppl
+ * 
+ * @date 2015-02-23
+ */
+
 #ifndef DEFINITIONS_HPP
 #define DEFINITIONS_HPP
 

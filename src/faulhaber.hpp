@@ -14,6 +14,14 @@
  * 
  * You should have received a copy of the GNU General Public License along
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+/**
+ * @file faulhaber.hpp
+ * @brief Pre-computes the Faulhaber polynoms
+ * @author Dominik Köppl
+ * 
+ * @date 2015-02-23
  */
 #ifndef FAULHABER_HPP
 #define FAULHABER_HPP
@@ -23,15 +31,33 @@
 namespace IntervalPartition
 {
 
+	/** Class for storing the Faulhaber polynoms
+	 *
+	 * The polynoms are generated in the constructor.
+	*/
 	class Faulhaber
 	{
 		public:
-			const size_t dimension;
-			Faulhaber(size_t _dimension);
-			~Faulhaber()
-			{
+			const size_t dimension; //!< the number of polynoms that can be accessed by operator()
+			
+			/** 
+			 * Precomputes the Faulhaber polynoms up to a certain dimension d
+			 * @pre We need for the computation d+2 rows of Binomial numbers and
+			 *      the first d+1 Bernoulli numbers
+			 * 
+			 * @param dimension The number of Faulhaber polynoms to compute. 
+			 */
+			Faulhaber(size_t dimension);
+			~Faulhaber() {
 				delete [] polynoms;
 			}
+
+			/** Accesses the i-th polynom
+			 * 
+			 * @param i \f$ 1 \le i \le \f$ dimension
+			 * 
+			 * @return the i-th Faulhaber polynom
+			 */
 			const Polynom& operator()(size_t i) const;
 			const static Faulhaber f;
 		private:

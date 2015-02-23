@@ -23,10 +23,14 @@ namespace IntervalPartition
 {
 
 SumFromZeroToUpper SumFromZeroToUpper::s;
+/**
+ * The code follows basically the proof of Lemma 4.5 with \f$ \gamma = 0 \f$.
+ */
 const Polynom& SumFromZeroToUpper::operator()(const Polynom& p)
 {
 	std::map<Polynom, Polynom>::const_iterator it = cache.find(p);
 	if(it != cache.end()) return it->second;
+	// Create a new polynom
 	cache.insert(std::pair<Polynom,Polynom>(p, Polynom(p.size()+1)));
 	Polynom& ret = cache.find(p)->second;
 	
@@ -44,6 +48,10 @@ const Polynom& SumFromZeroToUpper::operator()(const Polynom& p)
 	return ret;
 }
 
+/**
+ * We use the function SumFromZeroToUpper::operator() and rewrite the coefficients
+ * to match the \f$ z-\gamma \f$ upper bound of the sum.
+ */
 Polynom sumFromZeroToZMinusGamma(const Polynom& p, const Z& gamma)
 {
 	Polynom ret(p.size()+1);
