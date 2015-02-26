@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/zsh
 #
 # Integer Partition
 # Computes the number of possible ordered integer partitions with upper bounds

@@ -1,2 +1,2 @@
-SET(integer_partition_SRCS binomial.cpp faulhaber.cpp intervalled_polynom.cpp interval_partition.cpp polynom.cpp sum_from_zero_to_upper.cpp ) 
-SET(integer_partition_HEADER binomial.hpp checked_vector.hpp definitions.hpp faulhaber.hpp intervalled_polynom.hpp interval_partition.hpp polynom.hpp sum_from_zero_to_upper.hpp ) 
+SET(integer_partition_SRCS binomial.cpp debug.cpp faulhaber.cpp intervalled_polynom.cpp interval_partition.cpp polynom.cpp sum_from_zero_to_upper.cpp ) 
+SET(integer_partition_HEADER binomial.hpp checked_vector.hpp debug.hpp definitions.hpp faulhaber.hpp intervalled_polynom.hpp interval_partition.hpp macros.hpp naive.hpp polynom.hpp sum_from_zero_to_upper.hpp ) 

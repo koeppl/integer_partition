@@ -81,6 +81,11 @@ void IntervalledPolynom::push_back(const IB& intervalbound, const Polynom& polyn
 	intervalbounds.push_back(intervalbound);
 	polynoms.push_back(polynom);
 }
+void IntervalledPolynom::push_back(const IB& intervalbound, const Polynom&& polynom)
+{
+	intervalbounds.push_back(intervalbound);
+	polynoms.push_back(polynom);
+}
 void IntervalledPolynom::swap(IntervalledPolynom& o)
 {
 	intervalbounds.swap(o.intervalbounds);

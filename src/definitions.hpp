@@ -50,4 +50,8 @@ template <typename T> using vektor = IntervalPartition::checked_vector<T>;
 ////
 //
 
+#ifndef NDEBUG
+#include "debug.hpp"
+#endif
+
 #endif//guard

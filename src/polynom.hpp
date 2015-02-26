@@ -41,12 +41,17 @@ namespace IntervalPartition
 			 * Creates an empty polynom, i.e., all coefficienst are set to zero.
 			 * @param psize Creates a polynom with psize coefficients
 			 */
-		Polynom(size_t psize) : vektor<Q>(psize) {}
+		Polynom(size_t psize) : vektor<Q>(psize) { }
+//		Polynom(size_t psize, const size_t fill) : vektor<Q>(psize, Q(fill) {}
 		Polynom(const Polynom& pol) : vektor<Q>(pol) {}
 		Polynom() : vektor<Q>() {}
 
 		/**
 		 * Evaluates the polynom at position x
+		 * Uses Horner method
+		 * a_0 + a_1 x + a_2 x^2 + ... + a_{n-1} x^{n-1}
+		 * where std::vector stores the sequence (a_0, ..., a_{n-1})
+		 * 
 		 */
 		Q operator()(const Q& x) const
 		{
