@@ -42,7 +42,7 @@ namespace IntervalPartition
 			 * @param psize Creates a polynom with psize coefficients
 			 */
 		Polynom(size_t psize) : vektor<Q>(psize) { }
-//		Polynom(size_t psize, const size_t fill) : vektor<Q>(psize, Q(fill) {}
+		Polynom(size_t psize, const size_t fill) : vektor<Q>(psize) { Q f = fill; for(auto& i : *this) i = f;  }
 		Polynom(const Polynom& pol) : vektor<Q>(pol) {}
 		Polynom() : vektor<Q>() {}
 
@@ -72,6 +72,7 @@ namespace IntervalPartition
 			for(Q& coeff : *this) mpq_canonicalize(coeff.get_mpq_t());
 		}
 		const static Polynom zero; //!< the polynom with 0 as coefficient
+		const static Polynom one; //!< the polynom with 0 as coefficient
 	};
 	std::ostream& operator<<(std::ostream& os, const Polynom& v);
 }

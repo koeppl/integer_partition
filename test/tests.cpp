@@ -61,10 +61,10 @@
 
 
 void singletest() {
-	const unsigned int bounds[] = {2, 1, 3, 1, 1, 1, 2, 1, 1};
+	const unsigned int bounds[] = {2, 1, 2};
 //	const unsigned int bounds[] = {18, 1, 79};
 	constexpr size_t bsize = sizeof(bounds)/sizeof(unsigned int);
-	constexpr size_t z = 198;
+	constexpr size_t z = 0;
 
 	std::cout << naive_bounds<mpz_class >(bounds, z, 0, bsize-1) << std::endl;
 	IntervalPartition::IntervalledPolynom intervalledPolynom = IntervalPartition::generateIntervalPartition(bounds, bsize);
@@ -75,8 +75,8 @@ void singletest() {
 void test_partition() //(int argc, char** argv)
 {
 	std::default_random_engine generator;
-	std::uniform_int_distribution<int> dim_distro(1,8); 
-	std::uniform_int_distribution<int> urn_distro(2,50);
+	std::uniform_int_distribution<int> dim_distro(1,10); 
+	std::uniform_int_distribution<int> urn_distro(2,100);
 
 	for(int steps = 0; steps < 10000; ++steps) {
 		const size_t bsize = dim_distro(generator);
@@ -89,8 +89,9 @@ void test_partition() //(int argc, char** argv)
 		std::cout << z << std::endl;
 		std::cout << naive_bounds<mpz_class >(bounds, z, 0, bsize-1) << std::endl;
 		IntervalPartition::IntervalledPolynom intervalledPolynom = IntervalPartition::generateIntervalPartition(bounds, bsize);
+		std::cout << intervalledPolynom.at(z) << std::endl;
 		std::cout << intervalledPolynom(z) << std::endl;
-		EXPECT_EQ(intervalledPolynom(z),  naive_bounds<mpz_class >(bounds, z, 0, bsize-1));
+		ASSERT_EQ(intervalledPolynom(z),  naive_bounds<mpz_class >(bounds, z, 0, bsize-1));
 		delete [] bounds;
 	}
 
@@ -140,8 +141,8 @@ int main(int argc, char **argv)
 		run_celero();
 		return 0;
 	}
-//	singletest();
-//	return 0;
+	//singletest();
+	//return 0;
 	test_partition();
 	return 0;
 	return RUN_ALL_TESTS();

@@ -41,6 +41,8 @@ typedef mpz_class IB;
 //template <typename T> using vektor = std::vector<T>;
 template <typename T> using vektor = IntervalPartition::checked_vector<T>;
 
+extern const Z Z_zero;
+
 ////
 #ifdef DEBUG
 #define DEBUG_MSG(str) do { std::cout << str << std::endl; } while( false )

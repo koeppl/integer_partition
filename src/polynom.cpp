@@ -20,6 +20,7 @@
 namespace IntervalPartition
 {
 	const Polynom Polynom::zero(1);
+	const Polynom Polynom::one(1,1);
 	std::ostream& operator<<(std::ostream& os, const Polynom& v)
 	{
 		os << "p{";
@@ -31,3 +32,4 @@ namespace IntervalPartition
 		return os;
 	}
 }
+
