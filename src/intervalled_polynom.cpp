@@ -76,15 +76,17 @@ Q IntervalledPolynom::operator()(const Z& x) const
 {
 	return at(x)(x);
 }
+/*
 void IntervalledPolynom::push_back(const IB& intervalbound, const Polynom& polynom)
 {
 	intervalbounds.push_back(intervalbound);
 	polynoms.push_back(polynom);
 }
-void IntervalledPolynom::push_back(const IB& intervalbound, const Polynom&& polynom)
+*/
+void IntervalledPolynom::push_back(const IB& intervalbound, Polynom&& polynom)
 {
 	intervalbounds.push_back(intervalbound);
-	polynoms.push_back(polynom);
+	polynoms.push_back(std::move(polynom));
 }
 void IntervalledPolynom::swap(IntervalledPolynom& o)
 {

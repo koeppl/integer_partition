@@ -18,6 +18,7 @@
 #include "interval_partition.hpp"
 #include <cassert>
 #include "sum_from_zero_to_upper.hpp"
+#include "binomial.hpp"
 
 template<class T>
 std::ostream& operator<<(std::ostream& os, const std::vector<T>& v)
@@ -56,18 +57,6 @@ namespace IntervalPartition
 		return true;
 	}
 
-	/** 
-	 * The first term of the proof from Theorem 4.7
-	 * It is computed by the complete sum to the upper bound minus the sum from $0$ to $z-\gamma$.
-	 */
-	Polynom sumFromZMinusGammaToUpper(const Polynom& p, const Z& gamma, const Z& upper) {
-		const Q highest = SumFromZeroToUpper::s(p)(upper);
-		Polynom diff = sumFromZeroToZMinusGamma(p,gamma+1);
-		for(Q& coeff : diff)
-			coeff = -coeff;
-		diff[0] += highest;
-		return diff;
-	}
 
 
 	/** 
@@ -138,19 +127,16 @@ namespace IntervalPartition
 					 * with i_n = witness_left_index-2 and p = intevalledPolynom.at(intervalbounds[i_n+1])
 					 *
 					 */
-					if(witness_left_index <= intervalbounds.size() && witness_left_index > 0) {
-						const IB& current_intervalbound = intervalbounds[witness_left_index-1]; //!
-						LOG(INFO) << "Intervalbound: " << current_intervalbound;
-						const Polynom& toSum = intervalledPolynom.at(current_intervalbound);
-						const Polynom& upper = SumFromZeroToUpper::s(toSum);
-						const Polynom lower = sumFromZeroToZMinusGamma(toSum, dimensional_upper_bound+1);
-						Polynom together = upper - lower;
-						LOG(INFO) << "Together Sum: " << together;
-						return together;
-					}
-					else 
-						return Polynom::zero;
-
+					DCHECK_LE(witness_left_index, intervalbounds.size());
+					DCHECK_GT(witness_left_index, 0);
+					const IB& current_intervalbound = intervalbounds[witness_left_index-1]; //!
+					LOG(INFO) << "Intervalbound: " << current_intervalbound;
+					const Polynom& toSum = intervalledPolynom.at(current_intervalbound);
+					const Polynom& upper = SumFromZeroToUpper::s(toSum);
+					const Polynom lower = sumFromZeroToZMinusGamma(toSum, dimensional_upper_bound+1);
+					Polynom together = upper - lower;
+					LOG(INFO) << "Together Sum: " << together;
+					return together;
 				} else {
 					/**
 					 * Left-Witness-Intervall: intervalbounds[witness_left_index-1]
@@ -159,13 +145,17 @@ namespace IntervalPartition
 					 * \f$ \sum_{l= z - i_k }^{t} p(k) \f$
 					 * where p is intervallPolynom.at(Left-Witness)
 					 */
-					const Polynom lower_sum = (witness_left_index < 1 || witness_left_index-1 >= intervalbounds.size()) ? Polynom::zero : [&] () -> Polynom
+					const Polynom lower_sum([&] () -> Polynom
 					{
+						if(witness_left_index < 1 || witness_left_index-1 >= intervalbounds.size()) {
+							Polynom lower_sum_pol(Polynom::zero);
+							return lower_sum_pol;
+						}
 						const IB& lower_sum_intervalbound = intervalbounds[witness_left_index-1]; //!
 						LOG(INFO) << "Lower Interval: " << lower_sum_intervalbound;
 						Polynom lower_sum_pol = sumFromZMinusGammaToUpper(intervalledPolynom.at(lower_sum_intervalbound), dimensional_upper_bound, lower_sum_intervalbound);
 						return lower_sum_pol;
-					}();
+					}());
 					LOG(INFO) << "Lower Sum: " << lower_sum;
 					
 					/**
@@ -206,11 +196,15 @@ namespace IntervalPartition
 					 * \f$ \sum_{k= s}^{z} p(k) \f$
 					 * where p is intervallPolynom.at(Right-Witness)
 					 */
-					const Polynom upper_sum = (witness_right_index-1 >= intervalbounds.size()) ? Polynom::zero : [&] () -> Polynom
+					const Polynom upper_sum( [&] () -> Polynom
 					{
+						if(witness_right_index-1 >= intervalbounds.size()) {
+							Polynom upper_sum_pol(Polynom::zero);
+							return upper_sum_pol;
+						}
 						const IB& upper_sum_intervalupper_bound = intervalbounds[witness_right_index-1]; //!
 						LOG(INFO) << "Upper Interval: " << upper_sum_intervalupper_bound;
-						Polynom upper_sum_pol = SumFromZeroToUpper::s(intervalledPolynom.at(upper_sum_intervalupper_bound));
+						Polynom upper_sum_pol = Polynom(SumFromZeroToUpper::s(intervalledPolynom.at(upper_sum_intervalupper_bound)));
 						LOG(INFO) << "upper_sum_pol pre " << upper_sum_pol;
 						if(witness_right_index > 1)
 						{
@@ -220,7 +214,7 @@ namespace IntervalPartition
 						LOG(INFO) << "upper_sum_pol post " << upper_sum_pol;
 						DCHECK_GE(upper_sum_pol(intervalbounds[witness_right_index-1]), 0) << "Upper Sum is Negative!"; // Invariant: polynomial is non-negative
 						return upper_sum_pol;
-					}();
+					}());
 					LOG(INFO) << "Upper Sum: " << upper_sum;
 
 					
@@ -253,7 +247,7 @@ namespace IntervalPartition
 		{
 			Polynom pol(1);
 			pol[0] = 1;
-			intervalledPolynom.push_back(dimensional_upper_bounds[0], pol);
+			intervalledPolynom.push_back(dimensional_upper_bounds[0], std::move(pol));
 		}//!< This is exactly the induction base of Theorem 4.7
 
 		for(size_t k = 1; k < dimensions; ++k)
@@ -265,7 +259,8 @@ namespace IntervalPartition
 			vektor<IB> help_intervalbounds;
 			const unsigned int& dimensional_upper_bound = dimensional_upper_bounds[k];
 
-			if(dimensional_upper_bound > 1) { // we do now want a help_intervalbounds-value of 0
+			//if(dimensional_upper_bound > 1) 
+			{ // we do now want a help_intervalbounds-value of 0
 				help_intervalbounds.push_back(dimensional_upper_bound - 1);
 			}
 
@@ -359,10 +354,12 @@ namespace IntervalPartition
 				LOG(INFO) << "tmp_intervalbounds: " << tmp_intervalbounds;
 				LOG(INFO) << "intervalbounds: " << intervalbounds;
 				
-				tmp_intervalledPolynom.push_back(tmp_intervalbounds.back(), 
+				Polynom toAdd(
 						std::move(sumPolynomialOverWitnesses(
 						dimensional_upper_bound, intervalbounds, intervalledPolynom, 
 						witness_left_index, witness_right_index)));
+				if(toAdd != Polynom::zero) 
+				tmp_intervalledPolynom.push_back(tmp_intervalbounds.back(), std::move(toAdd));
 				DCHECK_GE(tmp_intervalledPolynom.at(tmp_intervalbounds.back())(tmp_intervalbounds.back()), 0); // Invariant: polynomial is non-negative
 			}
 
@@ -376,11 +373,25 @@ namespace IntervalPartition
 			intervalbounds.swap(tmp_intervalbounds);
 			intervalledPolynom.swap(tmp_intervalledPolynom);
 
-
-
 			LOG(INFO) << "_old_intervals: " << intervalbounds;
 		}
 		LOG(INFO) << "Resulting Intervalled Polynom: " << intervalledPolynom;
+#ifndef NDEBUG
+		{ // checking for invariants
+			//! \f$ \forall z \le \min(i_1,...,i_n) => intervalledPolynom(z) = (z+n-1 \choose z) \f$
+			const unsigned int& minimalDimensionSize = *(std::min_element(dimensional_upper_bounds, dimensional_upper_bounds+dimensions));
+			for(size_t z = 0; z < minimalDimensionSize; ++z) { 
+				DCHECK_EQ(intervalledPolynom(z), Binomial::b(dimensions+z-1, z))  <<
+					"for very small z, the upper bounds do not pose any constraint to the distribution of z." 
+					"So the result is the same as for the 'bars and stars' problem.";
+			}
+			const size_t& dimensionalSum = std::accumulate(dimensional_upper_bounds, dimensional_upper_bounds+dimensions, static_cast<size_t>(0));
+			for(size_t z = 0; z < dimensionalSum/2; ++z) {
+				DCHECK_EQ(intervalledPolynom(z), intervalledPolynom(dimensionalSum-z)) <<
+					"The solution is axis symmetric wrt. to the sum over all upper bounds.";
+			}
+		}
+#endif
 		return intervalledPolynom;
 	}
 

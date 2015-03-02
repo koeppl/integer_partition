@@ -72,4 +72,17 @@ Polynom sumFromZeroToZMinusGamma(const Polynom& p, const Z& gamma)
 	return ret;
 }
 
+/** 
+ * The first term of the proof from Theorem 4.7
+ * It is computed by the complete sum to the upper bound minus the sum from $0$ to $z-\gamma$.
+ */
+Polynom sumFromZMinusGammaToUpper(const Polynom& p, const Z& gamma, const Z& upper) {
+	const Q highest = SumFromZeroToUpper::s(p)(upper);
+	Polynom diff = sumFromZeroToZMinusGamma(p,gamma+1);
+	for(Q& coeff : diff)
+		coeff = -coeff;
+	diff[0] += highest;
+	return diff;
+}
+
 }//namespace

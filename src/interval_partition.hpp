@@ -42,12 +42,6 @@ namespace IntervalPartition {
 	 */
 	IntervalledPolynom generateIntervalPartition(const unsigned int* const dimensional_upper_bounds, const size_t dimensions);
 
-	/** 
-	 * Computes \f$ \sum_{k = z - \gamma}^{upper} p(k) \f$
-	 * 
-	 * @return the polynom resulting by the summation
-	 */
-	Polynom sumFromZMinusGammaToUpper(const Polynom& p, const Z& gamma, const Z& upper);
 }
 #endif//guard
 

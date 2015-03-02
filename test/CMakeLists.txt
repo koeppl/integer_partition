@@ -1,14 +1,14 @@
 
-set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} /home/niki/opt/lib)
-set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} /home/niki/opt/include)
-SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -I/home/niki/opt/include" )
-SET(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} -L/home/niki/opt/lib" )
+#set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} /home/niki/opt/lib)
+#set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} /home/niki/opt/include)
+#SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -I/home/niki/opt/include" )
+#SET(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} -L/home/niki/opt/lib" )
 #find_package(GTest REQUIRED)
 #include_directories(${GTEST_INCLUDE_DIR})
 
 include_directories (${integer_partition_SOURCE_DIR}/src) 
 link_directories (${integer_partition_BINARY_DIR}/src) 
-add_executable  (intervaltest tests.cpp celero.cpp)
+add_executable  (intervaltest tests.cpp celero.cpp basic_tests.cpp partition_tests.cpp)
 target_link_libraries  (intervaltest ${GTEST_LIBRARY})
 target_link_libraries  (intervaltest ${GFLAGS_LIBRARY})
 target_link_libraries  (intervaltest ${GLOG_LIBRARY})
@@ -17,3 +17,8 @@ target_link_libraries (intervaltest celero)
 target_link_libraries (intervaltest pthread)
 enable_testing()
 add_test(NAME intervaltest COMMAND intervaltest)
+
+
+if( CODE_COVERAGE )                                                                                                                                            
+SETUP_TARGET_FOR_COVERAGE(test_cov intervaltest coverage)
+endif()

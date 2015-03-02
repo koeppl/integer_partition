@@ -72,45 +72,7 @@ void singletest() {
 	DCHECK_EQ(intervalledPolynom(z),  naive_bounds<mpz_class >(bounds, z, 0, bsize-1));
 }
 
-void test_partition() //(int argc, char** argv)
-{
-	std::default_random_engine generator;
-	std::uniform_int_distribution<int> dim_distro(1,10); 
-	std::uniform_int_distribution<int> urn_distro(2,100);
 
-	for(int steps = 0; steps < 10000; ++steps) {
-		const size_t bsize = dim_distro(generator);
-		unsigned int*const bounds = new unsigned int[bsize];
-		for(size_t i = 0; i < bsize; ++i)
-			bounds[i] = urn_distro(generator);
-		unsigned long z = std::uniform_int_distribution<unsigned long>(0, std::accumulate(bounds, bounds+bsize,0UL)+1)(generator);
-		for(size_t i = 0; i < bsize; ++i) 
-			std::cout << bounds[i] << ", ";
-		std::cout << z << std::endl;
-		std::cout << naive_bounds<mpz_class >(bounds, z, 0, bsize-1) << std::endl;
-		IntervalPartition::IntervalledPolynom intervalledPolynom = IntervalPartition::generateIntervalPartition(bounds, bsize);
-		std::cout << intervalledPolynom.at(z) << std::endl;
-		std::cout << intervalledPolynom(z) << std::endl;
-		ASSERT_EQ(intervalledPolynom(z),  naive_bounds<mpz_class >(bounds, z, 0, bsize-1));
-		delete [] bounds;
-	}
-
-
-	/*
-	if(argc < 3)
-	{
-		std::cout << argv[0] << " - calculate the " << std::endl;
-		std::cout << "Usage: " << argv[0] << " n i_0 [i_1 [i_2 [...]]]" << std::endl;
-		return 1;
-	}
-	const size_t bsize = argc-2;
-	const unsigned long z = strtoul(argv[1], NULL, 10);
-    unsigned int*const bounds = new unsigned int[bsize];
-	for(size_t i = 2; i < static_cast<size_t>(argc); ++i)
-		bounds[i-2] = strtoul(argv[i], NULL, 10);
-*/
-
-}
 
 #include "celero.hpp"
 DEFINE_uint64(seed, std::default_random_engine::default_seed, "Random Seed");
@@ -121,10 +83,10 @@ namespace google {}
 namespace gflags {}
 int main(int argc, char **argv)
 {
-	IB a = 25;
-	Q b = 4/7;
-	to_dump(a);
-	to_dump(b);
+//	IB a = 25;
+//	Q b = 4/7;
+//	to_dump(a);
+//	to_dump(b);
 //	std::cout << to_string(a) << std::endl;
 //	to_string(b);
 
@@ -143,17 +105,26 @@ int main(int argc, char **argv)
 	}
 	//singletest();
 	//return 0;
-	test_partition();
-	return 0;
+//	test_partition();
 	return RUN_ALL_TESTS();
 }
 
 
 #include "binomial.hpp"
+#include "faulhaber.hpp"
+#include "bernoulli.hpp"
 #include <celero/Celero.h>
-BASELINE(DemoSimple, Baseline, 10, 10)
+BASELINE(Binomial, Baseline, 10, 10)
 {
-    celero::DoNotOptimizeAway(IntervalPartition::Binomial(1000));
+    celero::DoNotOptimizeAway(IntervalPartition::Binomial(BINOMIAL_DIM));
+}
+BASELINE(Bernoulli, Baseline, 10, 10)
+{
+    celero::DoNotOptimizeAway(IntervalPartition::Bernoulli(IntervalPartition::Binomial::b, BERNOULLI_DIM));
+}
+BASELINE(Faulhaber, Baseline, 10, 10)
+{
+    celero::DoNotOptimizeAway(IntervalPartition::Faulhaber(FAULHABER_DIM));
 }
 /*
 BENCHMARK(DemoSimple, GMP, 10, 10)
@@ -166,6 +137,62 @@ BENCHMARK(DemoSimple, GMP, 10, 10)
 //	for(size_t i = 0; i < bsize;++i) sum += bounds[i];
 //	std::cout << intervalledPolynom(sum/2) << std::endl;
 
+#include "macros.hpp"
+#define ROLANDBENCH(s_number, s_bounds, s_z) \
+BASELINE(CONCATENATE(Roland, s_number), Naive, 10, 10) \
+{ \
+	constexpr unsigned int bounds[] = s_bounds; \
+	constexpr size_t bsize = sizeof(bounds)/sizeof(unsigned int); \
+	celero::DoNotOptimizeAway(naive_bounds<mpz_class >(bounds, s_z, 0, bsize-1)); \
+} \
+\
+BENCHMARK(CONCATENATE(Roland, s_number), Partition, 10, 10) \
+{ \
+	constexpr unsigned int bounds[] = s_bounds ; \
+	constexpr size_t bsize = sizeof(bounds)/sizeof(unsigned int); \
+	celero::DoNotOptimizeAway(IntervalPartition::generateIntervalPartition(bounds, bsize)(s_z)); \
+} 
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//ROLANDBENCH( 12 , MACRO_ESCAPE({10000, 10005, 10010, 10015, 10021, 10027, 10039, 10063}), 40090)
+//ROLANDBENCH( 13 , MACRO_ESCAPE({10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000}), 5000)
+//ROLANDBENCH( 14 , MACRO_ESCAPE({10993, 10520, 10856, 10346, 10039, 10644, 10005, 10941, 10718, 10305}), 52683)
+//ROLANDBENCH( 15 , MACRO_ESCAPE({12184, 12324, 14685, 11098, 13357, 13863, 10796, 10914, 10989, 11115, 10937}), 66131)
+//ROLANDBENCH( 19 , MACRO_ESCAPE({5641, 9314, 969, 8643, 6291, 6241, 8747, 7041}), 26433)
+//ROLANDBENCH( 17 , MACRO_ESCAPE({12184, 12324, 14685, 11098, 13357, 13863, 10796, 10914, 10989, 11115, 10937, 13634}), 72948)
+
+
+
+
+
+
+
+
+ROLANDBENCH( 1  , MACRO_ESCAPE({3, 4, 5}), 1)
+ROLANDBENCH( 2  , MACRO_ESCAPE({3, 4, 5}), 15)
+ROLANDBENCH( 3  , MACRO_ESCAPE({3000, 4000, 5000}), 1)
+ROLANDBENCH( 4  , MACRO_ESCAPE({3000, 4000, 5000}), 6000)
+ROLANDBENCH( 5  , MACRO_ESCAPE({104 , 104 , 104 , 104, 104 }), 1)
+ROLANDBENCH( 6  , MACRO_ESCAPE({104 , 104 , 104, 104, 104 }), 300)
+//ROLANDBENCH( 7  , MACRO_ESCAPE({104, 104, 104 , 104 , 104}), 250000)
+//ROLANDBENCH( 8  , MACRO_ESCAPE({10000, 10005, 10010, 10015, 10020}), 25015)
+ROLANDBENCH( 9  , MACRO_ESCAPE({10993, 10520, 10856, 10346, 10039}), 1)
+//ROLANDBENCH( 10 , MACRO_ESCAPE({10993, 10520, 10856, 10346, 10039}), 26377)
+ROLANDBENCH( 11 , MACRO_ESCAPE({33, 29, 42, 34, 59, 76, 54, 33}), 180)
+//ROLANDBENCH( 16 , MACRO_ESCAPE({12184, 12324, 14685, 11098, 13357, 13863, 10796, 10914, 10989, 11115, 10937, 13634}), 1)
+ROLANDBENCH( 18 , MACRO_ESCAPE({3696, 3894, 4137, 7588, 7816}), 2856)

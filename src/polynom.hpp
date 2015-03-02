@@ -43,7 +43,8 @@ namespace IntervalPartition
 			 */
 		Polynom(size_t psize) : vektor<Q>(psize) { }
 		Polynom(size_t psize, const size_t fill) : vektor<Q>(psize) { Q f = fill; for(auto& i : *this) i = f;  }
-		Polynom(const Polynom& pol) : vektor<Q>(pol) {}
+		explicit Polynom(const Polynom& pol) : vektor<Q>(pol) {}
+		Polynom(Polynom&& pol) : vektor<Q>(pol) {}
 		Polynom() : vektor<Q>() {}
 
 		/**

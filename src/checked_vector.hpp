@@ -23,6 +23,7 @@ namespace IntervalPartition {
 		public:
 		checked_vector(size_t _size) : std::vector<T>(_size) {}
 		checked_vector(const checked_vector<T>& pol) : std::vector<T>(pol) {}
+		checked_vector(checked_vector<T>&& pol) : std::vector<T>(pol) {}
 		checked_vector() : std::vector<T>() {}
 #ifndef NDEBUG
 		T& operator[](size_t n) /*override*/ { 

@@ -15,42 +15,21 @@
  * You should have received a copy of the GNU General Public License along
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "faulhaber.hpp"
-#include "binomial.hpp"
-#include <cassert>
-#include <glog/logging.h>
 #include "bernoulli.hpp"
-
 
 namespace IntervalPartition
 {
+static_assert(BERNOULLI_DIM+1 < BINOMIAL_DIM, "Bernoulli dimension must be less than Binomial dimension -1");
+const Bernoulli Bernoulli::b(Binomial::b, BERNOULLI_DIM);
 
-static_assert(FAULHABER_DIM+3 < BINOMIAL_DIM, "Faulhaber dimension must be less than Binomial dimension -3");
-const Faulhaber Faulhaber::f(FAULHABER_DIM);
-
-Faulhaber::Faulhaber(size_t _dimension)
-	: dimension(_dimension), polynoms(new Polynom[dimension])
-{
-	DCHECK_GT(BINOMIAL_DIM, dimension+2);
-	DCHECK_GT(BERNOULLI_DIM, dimension+1);
-	for(size_t p = 0; p < dimension; ++p)
-	{
-		polynoms[p].resize(p+2);
-		for(size_t j = 0; j < p+1; ++j)
-		{
-			Q& coeff = polynoms[p][p+1-j];
-			coeff = ( Bernoulli::b[j] * Binomial::b(p+1,j) )  / (p+1);
-	//		std::cout << "(" << p+1 << "," << j << ") " << polynoms[j] << "\n";
-			if(j%2) coeff *= -1;
-		}
+std::ostream& operator<<(std::ostream& os, const IntervalPartition::Bernoulli& b) {
+	os << "Bernoulli {";
+	for(size_t i = 0; i < b.dimension; ++i) {
+		os << b[i] << " ";
 	}
+	os << "}";
+	os << std::endl;
+	return os;
 }
 
-
-const Polynom& Faulhaber::operator()(size_t i) const
-{
-	DCHECK_LT(i, dimension);
-	return polynoms[i];
-}
-
-}//namespace
+}//ns

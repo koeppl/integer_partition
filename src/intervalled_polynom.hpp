@@ -47,6 +47,7 @@ namespace IntervalPartition
 			vektor<IB> intervalbounds;
 			vektor<Polynom> polynoms;
 		public:
+			const vektor<IB>& bounds() const{ return intervalbounds; }
 
 			/** 
 			 * Returns the polynom that coincides with this polynomial at that given point.
@@ -69,11 +70,11 @@ namespace IntervalPartition
 			 * @param intervalbound for an interval [a,b] the right value b
 			 * @param polynom The polynom with which this polynomial shall coincide
 			 */
-			void push_back(const IB& intervalbound, const Polynom& polynom);
+//			void push_back(const IB& intervalbound, const Polynom& polynom);
 			/**
 			 * Consumes additionally the polynom.
 			 */
-			void push_back(const IB& intervalbound, const Polynom&& polynom);
+			void push_back(const IB& intervalbound, Polynom&& polynom);
 
 			/** 
 			 * Swaps contents with another polynomial
@@ -82,6 +83,7 @@ namespace IntervalPartition
 
 			/** 
 			 * Evaluates the polynomial at position x
+			 * As it evaluates canonicalize on its coefficients, it cannot be made const
 			 * 
 			 * @return The evaluated value
 			 */

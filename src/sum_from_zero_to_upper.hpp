@@ -56,6 +56,14 @@ namespace IntervalPartition
 	 */
 	Polynom sumFromZeroToZMinusGamma(const Polynom& p, const Z& gamma);
 
+	/** 
+	 * Computes \f$ \sum_{k = z - \gamma}^{upper} p(k) \f$
+	 * 
+	 * @return the polynom resulting by the summation
+	 */
+	Polynom sumFromZMinusGammaToUpper(const Polynom& p, const Z& gamma, const Z& upper);
+
+
 }
 #endif//guard
 
