@@ -31,5 +31,21 @@ namespace IntervalPartition
 		os << "}";
 		return os;
 	}
+	Polynom operator-(const Polynom& a, const Polynom& b) {
+		Polynom together(std::max(a.size(), b.size()));
+		for(size_t l = 0; l < together.size(); ++l) {
+			if(l < a.size()) together[l] += a[l];
+			if(l < b.size()) together[l] -= b[l];
+		}
+		return together;
+	}
+	Polynom operator+(const Polynom& a, const Polynom& b) {
+		Polynom together(std::max(a.size(), b.size()));
+		for(size_t l = 0; l < together.size(); ++l) {
+			if(l < a.size()) together[l] += a[l];
+			if(l < b.size()) together[l] += b[l];
+		}
+		return together;
+	}
 }
 

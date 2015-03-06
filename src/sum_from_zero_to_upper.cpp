@@ -18,22 +18,20 @@
 #include "sum_from_zero_to_upper.hpp"
 #include "faulhaber.hpp"
 #include "binomial.hpp"
+#include <glog/logging.h>
 
 namespace IntervalPartition
 {
 
-SumFromZeroToUpper SumFromZeroToUpper::s;
-/**
- * The code follows basically the proof of Lemma 4.5 with \f$ \gamma = 0 \f$.
+
+/** 
+ * Computes \f$ \sum_{k = 0}^{upper} p(k) \f$
+ * 
+ * @return the polynom resulting by the summation
  */
-const Polynom& SumFromZeroToUpper::operator()(const Polynom& p)
+Polynom sumFromZeroToUpper(const Polynom& p)
 {
-	std::map<Polynom, Polynom>::const_iterator it = cache.find(p);
-	if(it != cache.end()) return it->second;
-	// Create a new polynom
-	cache.insert(std::pair<Polynom,Polynom>(p, Polynom(p.size()+1)));
-	Polynom& ret = cache.find(p)->second;
-	
+	Polynom ret(p.size()+1);
 	for(size_t l = 0; l < p.size()+1; ++l) // l : Index of faulhaber's polynom
 	{
 		Q& koeff = ret[l];
@@ -48,41 +46,5 @@ const Polynom& SumFromZeroToUpper::operator()(const Polynom& p)
 	return ret;
 }
 
-/**
- * We use the function SumFromZeroToUpper::operator() and rewrite the coefficients
- * to match the \f$ z-\gamma \f$ upper bound of the sum.
- */
-Polynom sumFromZeroToZMinusGamma(const Polynom& p, const Z& gamma)
-{
-	Polynom ret(p.size()+1);
-	const Polynom& summedUp = SumFromZeroToUpper::s(p);
-	for(size_t m = 0; m < p.size()+1; ++m) // m: index of leibniz binomial formula
-	{
-		Q& coeff = ret[m];
-		Z gammapot = 1;
-		for(size_t l = m; l < p.size()+1; ++l)
-		{
-			coeff += summedUp[l] * Binomial::b(l,m) * gammapot;
-//			std::cout << "l=" << l << " m=" << m << " coeff=" << coeff << " gammapot=" << gammapot << std::endl;
-	//		if( (l-m) % 2) coeff = -coeff;
-			gammapot *= -gamma;
-		}
-	}
-//	std::cout << "ret=" << ret << std::endl;
-	return ret;
-}
-
-/** 
- * The first term of the proof from Theorem 4.7
- * It is computed by the complete sum to the upper bound minus the sum from $0$ to $z-\gamma$.
- */
-Polynom sumFromZMinusGammaToUpper(const Polynom& p, const Z& gamma, const Z& upper) {
-	const Q highest = SumFromZeroToUpper::s(p)(upper);
-	Polynom diff = sumFromZeroToZMinusGamma(p,gamma+1);
-	for(Q& coeff : diff)
-		coeff = -coeff;
-	diff[0] += highest;
-	return diff;
-}
 
 }//namespace

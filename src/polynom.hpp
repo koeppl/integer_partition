@@ -76,6 +76,9 @@ namespace IntervalPartition
 		const static Polynom one; //!< the polynom with 0 as coefficient
 	};
 	std::ostream& operator<<(std::ostream& os, const Polynom& v);
-}
+
+	Polynom operator-(const Polynom& a, const Polynom& b);
+	Polynom operator+(const Polynom& a, const Polynom& b);
+}//ns
 #endif//guard
 

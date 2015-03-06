@@ -56,7 +56,7 @@ class Bernoulli
 			DCHECK_LT(i, dimension);
 			return bernoulli[i];
 		}
-		const static Bernoulli b;
+	const static Bernoulli b; //<! singleton instance
 	private:
 		Q*const bernoulli;
 };

@@ -46,16 +46,18 @@ namespace IntervalPartition
 				delete binomials;
 			}
 			Binomial(size_t _dimension) 
-				: dimension(_dimension), binomials(new Z*[dimension+1]), zero(0)
+				: dimension(_dimension), binomials(new Z*[dimension+1]) 
 			{
-				for(size_t i = 0; i < dimension+1; ++i) {
-					binomials[i] = new Z[i+1];
+				for(size_t i = 0; i <= dimension; ++i) {
+					binomials[i] = new Z[i+2]; //We need i+2 as we use later binomials[i-1][j]
 					binomials[i][0] = 1;
+					//binomials[i][i+1] = 0; //!< reset to zero if the default constructor of Z does not do this job
 				}
 				for(size_t i = 1; i <= dimension; ++i)
 				for(size_t j = 1; j <= i; ++j)
 					binomials[i][j] = binomials[i-1][j-1] + binomials[i-1][j]; //TODO: binomials[][j] wrt. j symmetric! -> 1/2 space sufficient
 			}
+
 			const static Binomial b; //<! singleton instance
 
 			/** 
@@ -67,7 +69,6 @@ namespace IntervalPartition
 			const Z& operator()(size_t i, size_t j) const;
 		private:
 			Z**const binomials;
-			const Z zero;
 	};
 
 

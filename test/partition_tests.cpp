@@ -1,7 +1,6 @@
 #include "interval_partition.hpp"
 #include "naive.hpp"
 #include <gtest/gtest.h>
-#include <random>
 
 TEST(IntervalPartition, Example) {
 	{
@@ -54,7 +53,7 @@ TEST(IntervalPartition, Example) {
 		}
 		{
 			const unsigned int dimensional_upper_bounds[] = {30, 50, 10};
-			IntervalPartition::IntervalledPolynom intervalledPolynom = IntervalPartition::generateIntervalPartition(dimensional_upper_bounds, sizeof(dimensional_upper_bounds)/sizeof(unsigned int));
+			IntervalPartition::IntervalledPolynom intervalledPolynom = IntervalPartition::generateIntervalPartition(dimensional_upper_bounds, sizeof(dimensional_upper_bounds)/sizeof(unsigned int), false);
 			ASSERT_TRUE(intervalledPolynom == ip);
 		}
 		{
@@ -68,7 +67,7 @@ TEST(IntervalPartition, Example) {
 				return maxdim_;
 			}();
 			do {
-				IntervalPartition::IntervalledPolynom intervalledPolynom = IntervalPartition::generateIntervalPartition(dimensional_upper_bounds, dimensional_upper_bounds_length);
+				IntervalPartition::IntervalledPolynom intervalledPolynom = IntervalPartition::generateIntervalPartition(dimensional_upper_bounds, dimensional_upper_bounds_length, false);
 				for(size_t x = 0; x <= maxdim; ++x)
 					ASSERT_EQ(intervalledPolynom(x), ip(x));
 			}
@@ -77,42 +76,7 @@ TEST(IntervalPartition, Example) {
 	}
 }
 
-class IntervalPartitionRandom : public ::testing::Test {
-	std::default_random_engine generator;
-	std::uniform_int_distribution<int> dim_distro = std::uniform_int_distribution<int>(1,10); 
-	std::uniform_int_distribution<int> urn_distro = std::uniform_int_distribution<int>(2,10);
-
-	protected:
-	unsigned int* bounds = nullptr;
-	size_t bsize;
-	unsigned long z;
-
-	virtual void SetUp() override {
-		bounds = nullptr;
-	}
-	virtual void TearDown() {
-		if(bounds != nullptr) delete [] bounds;
-	}
-
-
-	void next() {
-		bsize = dim_distro(generator);
-		if(bounds != nullptr) delete [] bounds;
-		bounds = new unsigned int[bsize];
-		for(size_t i = 0; i < bsize; ++i)
-			bounds[i] = urn_distro(generator);
-		z = std::uniform_int_distribution<unsigned long>(0, std::accumulate(bounds, bounds+bsize,0UL)+1)(generator);
-	}
-	unsigned long get_z() const { return z; }
-	unsigned int* get_bounds() { return bounds; }
-	size_t get_bsize() const { return bsize; }
-
-	void print() const {
-		for(size_t i = 0; i < bsize; ++i) 
-			std::cout << bounds[i] << ", ";
-		std::cout << z << std::endl;
-	}
-};
+#include "intpartrandom.hpp"
 
 TEST_F(IntervalPartitionRandom, ModelCheck) {
 
@@ -120,7 +84,7 @@ TEST_F(IntervalPartitionRandom, ModelCheck) {
 		next();
 		print();
 		const auto naive_value = naive_bounds<mpz_class>(bounds, z, 0, bsize-1);
-		const IntervalPartition::IntervalledPolynom intervalledPolynom = IntervalPartition::generateIntervalPartition(bounds, bsize);
+		const IntervalPartition::IntervalledPolynom intervalledPolynom = IntervalPartition::generateIntervalPartition(bounds, bsize, false);
 
 		std::cout << naive_value << std::endl;
 		std::cout << intervalledPolynom.at(z) << std::endl;
@@ -132,15 +96,42 @@ TEST_F(IntervalPartitionRandom, PermutationInvariant) {
 	for(size_t steps = 0; steps < 10; ++steps) {
 		next();
 		print();
-		const IntervalPartition::IntervalledPolynom intervalledPolynom = IntervalPartition::generateIntervalPartition(bounds, bsize);
+		const IntervalPartition::IntervalledPolynom intervalledPolynom = IntervalPartition::generateIntervalPartition(bounds, bsize, false);
 		const unsigned int maxdim = std::accumulate(bounds, bounds+bsize,0);
 
 		// Invariant: If the bounds get shuffled, the resulting polynom's shape may change, but the resulting value should be the same.
 		for(size_t permut_steps = 0; permut_steps < 100 && std::next_permutation(bounds, bounds+bsize); ++permut_steps) {
-			IntervalPartition::IntervalledPolynom intervalledPolynom2 = IntervalPartition::generateIntervalPartition(bounds, bsize);
+			IntervalPartition::IntervalledPolynom intervalledPolynom2 = IntervalPartition::generateIntervalPartition(bounds, bsize, false);
 			for(size_t x = 0; x <= maxdim; ++x)
 				ASSERT_EQ(intervalledPolynom(x), intervalledPolynom2(x));
 		}
 		// TODO: check if even the polynoms are equal!
+	}
+}
+
+TEST_F(IntervalPartitionRandom, MirrorCheck) {
+	for(size_t steps = 0; steps < 1000; ++steps) {
+		next();
+		print();
+		IntervalPartition::IntervalledPolynom intervalledPolynom = IntervalPartition::generateIntervalPartition(bounds, bsize, false);
+		IntervalPartition::IntervalledPolynom newPolynom = IntervalPartition::generateIntervalPartition(bounds, bsize, true);
+		const size_t maxdim = std::accumulate(bounds, bounds+bsize,static_cast<size_t>(0));
+		std::cout << "O: " << intervalledPolynom.bounds().size() << "\n" << "N: " << newPolynom.bounds().size() << std::endl;
+
+		for(size_t i = 0; i < maxdim/2; ++i)
+			ASSERT_EQ(intervalledPolynom(i), newPolynom(i)) << intervalledPolynom << " vs " << newPolynom;
+		//ASSERT_TRUE(intervalledPolynom == newPolynom) << intervalledPolynom << " vs " << newPolynom;
+	}
+}
+
+
+TEST_F(IntervalPartitionRandom, ParallelCheck) {
+
+	for(size_t steps = 0; steps < 1000; ++steps) {
+		next();
+		print();
+		IntervalPartition::IntervalledPolynom intervalledPolynom = IntervalPartition::generateIntervalPartition(bounds, bsize,false);
+		IntervalPartition::IntervalledPolynom newPolynom = IntervalPartition::generateParallelIntervalPartition(bounds, bsize,false);
+		ASSERT_TRUE(intervalledPolynom == newPolynom) << intervalledPolynom << " vs " << newPolynom;
 	}
 }

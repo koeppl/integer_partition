@@ -16,52 +16,106 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "interval_partition.hpp"
+#include "util.hpp"
+#include "intervalled_polynom.hpp"
 #include "sum_from_zero_to_upper.hpp"
 #include "binomial.hpp"
-//#ifndef NDEBUG
-//	#include "prettyprint.hpp"
-//#endif
-#include "util.hpp"
-#include "sum_from_zero_cacher.hpp"
+#include <future>
+#include <iterator>
+#include <queue>
+#include "sum_from_zero_threads.hpp"
 
+namespace IntervalPartition {
 
-namespace IntervalPartition
-{
+	class PiecedPolyAsync {
+		public:
+		std::mutex evalMutex;
+		PiecedPolyAsync(const PiecedPolyAsync&) = delete; // This class is to experimantal to be used for copying...
+		PiecedPolyAsync() = default;
+		Polynom& evaluate(size_t distance) {
 
-	/** 
-	 * Returns the witness interval's upper bound
-	 * This function is used to prevent out-of-bounds (reading over intervalbound)
-	 * 
-	 * @param witness_index an index part of intervalbounds
-	 * @param intervalbounds a set of numbers that shall represent the upper bounds of a set of piecewise disjoint intervals covering Z
-	 * 
-	 * @return an entry of intervalbounds
-	 */
-	const IB& get_witness(size_t witness_index, const vektor<IB>& intervalbounds) {
-		if(witness_index == 0) return Z_zero;
-		if(witness_index > intervalbounds.size()) return intervalbounds[intervalbounds.size()-1];
-		return intervalbounds[witness_index-1];
+			if(evaluated_polynoms[distance] == nullptr) {
+				std::lock_guard<std::mutex> guard(evalMutex);
+				if(evaluated_polynoms[distance] != nullptr) return *evaluated_polynoms[distance];
+				try {
+					evaluated_polynoms[distance] = polynoms[distance]->get();
+					DCHECK(evaluated_polynoms[distance] != nullptr);// ((void*)evaluated_polynoms[distance]) << " is null!";
+				} catch (const std::future_error& e) {
+					DCHECK_EQ(false,true);
+				}
+
+			}
+			return *evaluated_polynoms[distance];
+		}
+			~PiecedPolyAsync() {
+				for(auto &p : evaluated_polynoms) if(p != nullptr) delete p;
+				for(auto &p : polynoms) if(p != nullptr) delete p;
+			}
+			vektor<IB> intervalbounds;
+			vektor<std::future<Polynom*>*> polynoms;
+			vektor<Polynom*> evaluated_polynoms;
+			const vektor<IB>& bounds() const{ return intervalbounds; }
+			const Polynom& at(const IB& point);
+			void push_back(const IB& intervalbound, std::future<Polynom*>&& polynom);
+			void push_back(const IB& intervalbound, Polynom* polynom);
+			void swap(PiecedPolyAsync& o);
+			Q operator()(const Z& x);
+			IntervalledPolynom extract() {
+				IntervalledPolynom o;
+				for(size_t i = 0; i < evaluated_polynoms.size(); ++i) {
+					o.push_back( intervalbounds[i], std::move(evaluate(i)));
+				}
+				return o;
+			}
+	};
+
+std::ostream& operator<<(std::ostream& os, PiecedPolyAsync& ip) {
+	os << "IP: ";
+	for(size_t i = 0; i < ip.intervalbounds.size(); ++i) {
+		os << "{" << ip.intervalbounds[i] << " => " << ip.at(i) << "}";
+		if(i+1 < ip.intervalbounds.size()) os << ", ";
 	}
+	return os;
+}
 
+const Polynom& PiecedPolyAsync::at(const IB& point) {
+	if(point < 0) return Polynom::zero;
+	LOG(INFO) <<  "Search " << point << " in " << intervalbounds;
+	vektor<IB>::const_iterator it = lower_bound(intervalbounds.begin(), intervalbounds.end(), point);
+	if(it != intervalbounds.end() && *it >= point) {
+		const size_t distance = std::distance<vektor<IB>::const_iterator>(intervalbounds.begin(),it);
+		Polynom& p = evaluate(distance);
+		LOG(INFO) << "Found " << intervalbounds[distance] << "->" << p;
+		return p;
+	}
+	LOG(INFO) << "Search failed !";
+	return Polynom::zero;
+}
 
-	/** 
-	 * Computes for the interval [witness_left_index, witness_right_index] the summation considered in Theorem 4.7
-	 * of the piecewise-defined polynomial intervalledPolynom, where dimensional_upper_bound is the current considered bound (i_{n+1})
-	 * 
-	 * @param dimensional_upper_bound $i_{k+1}$ of the dimensional_upper_bounds under consideration
-	 * @param intervalbounds the current bounds of the interval of the intervalledPolynom
-	 * @param intervalledPolynom the piecewise-defined polynomial over which to sum
-	 * @param witness_left_index the left border of intervalbounds to sum (+1)
-	 * @param witness_right_index the right border of intervalbounds to sum (+1)
-	 * 
-	 * @return the polynom resultion by the summation
-	 */
-	inline
-	Polynom sumPolynomialOverWitnesses
+Q PiecedPolyAsync::operator()(const Z& x) {
+	return at(x)(x);
+}
+void PiecedPolyAsync::push_back(const IB& intervalbound, std::future<Polynom*>&& polynom) {
+	intervalbounds.push_back(intervalbound);
+	polynoms.push_back(new std::future<Polynom*>(std::move(polynom)));
+	evaluated_polynoms.push_back(nullptr);
+}
+void PiecedPolyAsync::push_back(const IB& intervalbound, Polynom* polynom) {
+	intervalbounds.push_back(intervalbound);
+	polynoms.push_back(nullptr);
+	evaluated_polynoms.push_back(polynom);
+}
+void PiecedPolyAsync::swap(PiecedPolyAsync& o) {
+	intervalbounds.swap(o.intervalbounds);
+	polynoms.swap(o.polynoms);
+	evaluated_polynoms.swap(o.evaluated_polynoms);
+}
+
+	Polynom* sumParallelPolynomialOverWitnesses
 	( const unsigned int& dimensional_upper_bound // dimensional_upper_bounds[k]
 	, const vektor<IB>& intervalbounds 
 	, const std::function<const Polynom&(const Polynom&)>& SumFromZeroToUpper
-	, const IntervalledPolynom& intervalledPolynom
+	, PiecedPolyAsync& intervalledPolynom
 	, const size_t& witness_left_index
 	, const size_t& witness_right_index
 	)
@@ -86,8 +140,8 @@ namespace IntervalPartition
 					const Polynom& toSum = intervalledPolynom.at(current_intervalbound);
 					const Polynom& upper = SumFromZeroToUpper(toSum);
 					const Polynom lower = sumFromZeroToZMinusGamma(toSum, dimensional_upper_bound+1, SumFromZeroToUpper, Binomial::b);
-					Polynom together = upper - lower;
-					LOG(INFO) << "Together Sum: " << together;
+					Polynom* together = new Polynom(upper - lower);
+					LOG(INFO) << "Together Sum: " << (*together);
 					return together;
 				} else {
 					/**
@@ -170,20 +224,32 @@ namespace IntervalPartition
 					LOG(INFO) << "Upper Sum: " << upper_sum;
 
 					
-					Polynom together = upper_sum + lower_sum;
-					together[0] += const_sum;
-					LOG(INFO) << "Together Sum: " << together;
+					Polynom* together = new Polynom(upper_sum + lower_sum);
+					(*together)[0] += const_sum;
+					LOG(INFO) << "Together Sum: " << (*together);
 					return together;
 				}
 		}
 
 
 
+		struct Job {
+			const size_t m_dimension;
+			const size_t m_witness_left_index;
+			const size_t m_witness_right_index;
+			std::promise<Polynom*> m_result;
+			Job(const size_t dimension, const size_t witness_left_index, const size_t witness_right_index, std::promise<Polynom*>&& result) 
+				: m_dimension(dimension), m_witness_left_index(witness_left_index), m_witness_right_index(witness_right_index), m_result(std::move(result))
+			{
+			}
+		};
+
+
 	/**
 	 * Generates an intervalled polynom based on the interval bounds given as parameter
 	 * @pre \code length(dimensional_upper_bounds) == dimensions \endcode has to hold.
 	 */
-	IntervalledPolynom generateIntervalPartition(const unsigned int* const dimensional_upper_bounds, const size_t dimensions, bool useSymmetry)
+	IntervalledPolynom generateParallelIntervalPartition(const unsigned int* const dimensional_upper_bounds, const size_t dimensions, bool useSymmetry)
 	{
 		LOG(INFO) << "Interval Partitioning started";
 #ifndef NDEBUG
@@ -194,17 +260,19 @@ namespace IntervalPartition
 		// maxdim is only used if useSymmetry to decide the cut-off
 		const size_t maxdim = std::accumulate(dimensional_upper_bounds, dimensional_upper_bounds+dimensions,static_cast<size_t>(0)); 
 		vektor<IB> intervalbounds;
-		SumFromZeroCacher sumcacher; // instead of calling sumFromZeroToUpper each time, we cache its sum.
+		SumFromZeroCacherThreadSafe sumcacher; // instead of calling sumFromZeroToUpper each time, we cache its sum.
 		std::function<const Polynom&(const Polynom&)> SumFromZeroToUpper = [&sumcacher] (const Polynom& a) -> const Polynom& { return sumcacher(a);};
-
 
 		intervalbounds.push_back(dimensional_upper_bounds[0]);
 
-		IntervalledPolynom intervalledPolynom;
+		std::queue<Job> jobs;
+
+		vektor<PiecedPolyAsync> piecewisePolynoms(dimensions);
+
 		{
-			Polynom pol(1);
-			pol[0] = 1;
-			intervalledPolynom.push_back(dimensional_upper_bounds[0], std::move(pol));
+			Polynom* pol = new Polynom(1);
+			(*pol)[0] = 1;
+			piecewisePolynoms[0].push_back(dimensional_upper_bounds[0], pol);
 		}//!< This is exactly the induction base of Theorem 4.7
 
 		for(size_t k = 1; k < dimensions; ++k)
@@ -212,7 +280,7 @@ namespace IntervalPartition
 			LOG(INFO) << "k: " << k;
 
 			vektor<IB> tmp_intervalbounds; //! in this array the interval bounds of the next round (k+1) will be stored
-			IntervalledPolynom tmp_intervalledPolynom; //! this will be the polynom of the next round (k+1)
+//			PiecedPolyAsync tmp_intervalledPolynom; //! this will be the polynom of the next round (k+1)
 			vektor<IB> help_intervalbounds;
 			const unsigned int& dimensional_upper_bound = dimensional_upper_bounds[k];
 
@@ -304,38 +372,62 @@ namespace IntervalPartition
 					LOG(INFO) << "Fall 4, addiere " << help_intervalbound;
 					++j;
 				}
-				LOG(INFO) << "intervalledPolynom: " << intervalledPolynom;
-				LOG(INFO) << "tmp_intervalledPolynom: " << tmp_intervalledPolynom;
+//				LOG(INFO) << "intervalledPolynom: " << piecewisePolynoms[k-1];
+//				LOG(INFO) << "tmp_intervalledPolynom: " << piecewisePolynoms[k];
 				LOG(INFO) << "Witness: " << "[" << witness_left_index << ", " << witness_right_index << "]";
 				LOG(INFO) << "tmp_intervalbounds: " << tmp_intervalbounds;
 				LOG(INFO) << "intervalbounds: " << intervalbounds;
-				
-				Polynom toAdd(
-						std::move(
-							sumPolynomialOverWitnesses
-							( dimensional_upper_bound
-							, intervalbounds
-							, SumFromZeroToUpper
-							, intervalledPolynom
-							, witness_left_index
-							, witness_right_index)));
-				if(toAdd != Polynom::zero) 
-				tmp_intervalledPolynom.push_back(tmp_intervalbounds.back(), std::move(toAdd));
-				DCHECK_GE(tmp_intervalledPolynom.at(tmp_intervalbounds.back())(tmp_intervalbounds.back()), 0); // Invariant: polynomial is non-negative
+
+				std::promise<Polynom*> prom;
+
+				piecewisePolynoms[k].push_back(tmp_intervalbounds.back(), prom.get_future() );
+				jobs.emplace(k-1, witness_left_index, witness_right_index, std::move(prom));
+//				DCHECK_GE(tmp_intervalledPolynom.at(tmp_intervalbounds.back())(tmp_intervalbounds.back()), 0); // Invariant: polynomial is non-negative
 			}
 
-#ifndef NDEBUG
+/*#ifndef NDEBUG
 			DCHECK(has_ordering(tmp_intervalbounds, std::greater<IB>())); // Invariant: the numbers of tmp_intervalbounds are strict ascendending
 			for(const auto& ibound : tmp_intervalbounds) { //Invariant: the piecewise-defined polynomial is non-negative.
-				DCHECK_GE(tmp_intervalledPolynom.at(ibound)(ibound), 0);
+				DCHECK_GE(piecewisePolynoms[k].at(ibound)(ibound), 0);
 			}
-#endif
-
+#endif*/
 			intervalbounds.swap(tmp_intervalbounds);
-			intervalledPolynom.swap(tmp_intervalledPolynom);
+			//intervalledPolynom.swap(tmp_intervalledPolynom);
 
 			LOG(INFO) << "_old_intervals: " << intervalbounds;
 		}
+
+		constexpr size_t numthreads = 4;
+		std::thread threads[numthreads];
+		std::mutex queueMutex;
+		auto safePop = [&] () { 
+			std::lock_guard<std::mutex> guard(queueMutex);
+			if(jobs.empty()) return Job(0,0,0, std::promise<Polynom*>());
+			Job j(std::move(jobs.front())); 
+			jobs.pop();
+			return j;
+		};
+		auto runnable = [&] () {
+			while(!jobs.empty()) { 
+				Job j =std::move(safePop());
+				if(j.m_witness_left_index == 0 && j.m_witness_right_index == 0 && j.m_dimension == 0) return;
+				Polynom* p = sumParallelPolynomialOverWitnesses
+					( dimensional_upper_bounds[j.m_dimension+1] // == dimensional_upper_bound
+					  , piecewisePolynoms[j.m_dimension].bounds()
+					  , SumFromZeroToUpper
+					  , std::ref(piecewisePolynoms[j.m_dimension])
+					  , j.m_witness_left_index
+					  , j.m_witness_right_index);
+				j.m_result.set_value(p);
+			}};
+		for(size_t i = 0; i < numthreads; ++i)
+			threads[i] = std::thread(runnable);
+		for(size_t i = 0; i < numthreads; ++i)
+			threads[i].join();
+	
+
+		PiecedPolyAsync& intervalledPolynom = piecewisePolynoms[dimensions-1];
+
 		LOG(INFO) << "Resulting Intervalled Polynom: " << intervalledPolynom;
 #ifndef NDEBUG
 		{ // checking for invariants
@@ -346,16 +438,12 @@ namespace IntervalPartition
 					"for very small z, the upper bounds do not pose any constraint to the distribution of z." 
 					"So the result is the same as for the 'bars and stars' problem.";
 			}
-			const size_t& dimensionalSum = std::accumulate(dimensional_upper_bounds, dimensional_upper_bounds+dimensions, static_cast<size_t>(0));
-			for(size_t z = 0; z < dimensionalSum/2; ++z) {
-				DCHECK_EQ(intervalledPolynom(z), intervalledPolynom(dimensionalSum-z)) <<
-					"The solution is axis symmetric wrt. to the sum over all upper bounds.";
-			}
 		}
 #endif
-		return intervalledPolynom;
+		return intervalledPolynom.extract();
 	}
 
 
 
 }//namespace
+

@@ -15,19 +15,20 @@
  * You should have received a copy of the GNU General Public License along
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include "binomial.hpp"
 #include "bernoulli.hpp"
+#include "faulhaber.hpp"
 
-namespace IntervalPartition
-{
+/** Do NOT change the order of the variable intitialization below! **/
+namespace IntervalPartition {
 
-std::ostream& operator<<(std::ostream& os, const IntervalPartition::Bernoulli& b) {
-	os << "Bernoulli {";
-	for(size_t i = 0; i < b.dimension; ++i) {
-		os << b[i] << " ";
-	}
-	os << "}";
-	os << std::endl;
-	return os;
+
+	const Binomial Binomial::b(BINOMIAL_DIM);
+
+	static_assert(BERNOULLI_DIM+1 < BINOMIAL_DIM, "Bernoulli dimension must be less than Binomial dimension -1");
+	const Bernoulli Bernoulli::b(Binomial::b, BERNOULLI_DIM);
+
+	static_assert(FAULHABER_DIM+3 < BINOMIAL_DIM, "Faulhaber dimension must be less than Binomial dimension -3");
+	const Faulhaber Faulhaber::f(FAULHABER_DIM);
+
 }
-
-}//ns

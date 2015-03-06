@@ -18,18 +18,18 @@
 #include "intervalled_polynom.hpp"
 #include "polynom.hpp"
 #include <glog/logging.h>
-
-template<class T>
-std::ostream& operator<<(std::ostream& os, const std::vector<T>& v) {
-	os << "(";
-	for(size_t i = 0; i < v.size(); ++i) {
-		os << v[i] << " ";
-	}
-	os << ")";
-	return os;
-}
+#include "util.hpp"
 
 namespace IntervalPartition {
+
+std::ostream& operator<<(std::ostream& os, const IntervalledPolynom& ip) {
+	os << "IP: ";
+	for(size_t i = 0; i < ip.intervalbounds.size(); ++i) {
+		os << "{" << ip.intervalbounds[i] << " => " << ip.polynoms[i] << "}";
+		if(i+1 < ip.intervalbounds.size()) os << ", ";
+	}
+	return os;
+}
 
 bool IntervalledPolynom::operator==(IntervalledPolynom& o) {
 	for(size_t i = 0; i < intervalbounds.size(); ++i) {
@@ -62,16 +62,6 @@ const Polynom& IntervalledPolynom::at(const IB& point) const
 	return Polynom::zero;
 }
 
-std::ostream& operator<<(std::ostream& os, const IntervalledPolynom& ip)
-{
-	os << "IP: ";
-	for(size_t i = 0; i < ip.intervalbounds.size(); ++i)
-	{
-		os << "{" << ip.intervalbounds[i] << " => " << ip.polynoms[i] << "}";
-		if(i+1 < ip.intervalbounds.size()) os << ", ";
-	}
-	return os;
-}
 Q IntervalledPolynom::operator()(const Z& x) const
 {
 	return at(x)(x);
@@ -96,3 +86,4 @@ void IntervalledPolynom::swap(IntervalledPolynom& o)
 
 
 }
+

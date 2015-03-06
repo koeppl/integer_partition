@@ -37,10 +37,21 @@ namespace IntervalPartition {
 	 * @param dimensional_upper_bounds The upper bounds. Note that each value has to be strictly larger than 0.
 	 * Otherwise, please drop this dimension!
 	 * @param dimensions The length of dimensional_upper_bounds
+	 * @param useSymmetry Drops the validity bounds that do not intersect with the first half of the support of the final polynomial.
+	 *  Note that the solution can still be reconstructed as it is point symmetic at exactly this position.
 	 * 
 	 * @return A polynom that answers the integer partition problem for any z in linear time.
 	 */
-	IntervalledPolynom generateIntervalPartition(const unsigned int* const dimensional_upper_bounds, const size_t dimensions);
+	IntervalledPolynom generateIntervalPartition(const unsigned int* const dimensional_upper_bounds, const size_t dimensions, bool useSymmetry);
+	/**
+	 * @see generateIntervalPartition
+	 *
+	 * Parallel Version
+	 */
+	IntervalledPolynom generateParallelIntervalPartition(const unsigned int* const dimensional_upper_bounds, const size_t dimensions, bool useSymmetry);
+
+	/** Internal Usage **/
+	const IB& get_witness(size_t witness_index, const vektor<IB>& intervalbounds);
 
 }
 #endif//guard

@@ -27,13 +27,11 @@
 #include "definitions.hpp"
 #include "polynom.hpp"
 
-namespace IntervalPartition
-{
+namespace IntervalPartition {
 
 	class Polynom;
 	class IntervalledPolynom;
-	std::ostream& operator<<(std::ostream& os, const IntervalledPolynom& ip);
-
+	std::ostream& operator<<(std::ostream& os, const IntervalPartition::IntervalledPolynom& ip);
 
 	/** 
 	 * A piecewise-defined polynomial function
@@ -94,6 +92,6 @@ namespace IntervalPartition
 	};
 
 }//namespace
-std::ostream& operator<<(std::ostream& os, const IntervalPartition::IntervalledPolynom& ip);
+//std::ostream& operator<<(std::ostream& os, const IntervalPartition::IntervalledPolynom& ip);
 #endif//guard
 

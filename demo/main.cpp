@@ -73,7 +73,7 @@ int main(int argc, char** argv)
 	for(size_t i = 2; i < static_cast<size_t>(argc); ++i)
 		bounds[i-2] = strtoul(argv[i], NULL, 10);
 
-	IntervalPartition::IntervalledPolynom intervalledPolynom = IntervalPartition::generateIntervalPartition(bounds, bsize);
+	IntervalPartition::IntervalledPolynom intervalledPolynom = IntervalPartition::generateIntervalPartition(bounds, bsize, false);
 	std::cout << intervalledPolynom(z) << std::endl;
 	delete [] bounds;
 	return 0;

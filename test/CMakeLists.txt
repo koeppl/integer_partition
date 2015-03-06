@@ -8,7 +8,7 @@
 
 include_directories (${integer_partition_SOURCE_DIR}/src) 
 link_directories (${integer_partition_BINARY_DIR}/src) 
-add_executable  (intervaltest tests.cpp celero.cpp basic_tests.cpp partition_tests.cpp)
+add_executable  (intervaltest tests.cpp celero.cpp basic_tests.cpp partition_tests.cpp bin2.cpp) #newpartition.cpp parallelpartition.cpp)
 target_link_libraries  (intervaltest ${GTEST_LIBRARY})
 target_link_libraries  (intervaltest ${GFLAGS_LIBRARY})
 target_link_libraries  (intervaltest ${GLOG_LIBRARY})

@@ -114,7 +114,7 @@ TEST(Polynom, SumFormZMinusGammaToUpper) {
 		Polynom pol(p);
 		for(size_t i = 0; i < p; ++i)
 			pol[i] = random.get();
-		const Q res1 = sumFromZMinusGammaToUpper(pol,gamma,upper)(x);
+		const Q res1 = sumFromZMinusGammaToUpper(pol,gamma,upper, sumFromZeroToUpper, Binomial::b)(x);
 		const Q res2 = sumFromZMinusGammaToUpperTest(pol,gamma, upper, x);
 		ASSERT_EQ(res1, res2) << "SumToUpper: " << "x=" << x << ",gamma=" 
 			<< gamma << "," << "upper=" << upper << ",p=" << p << "\t" << res1 << " " << res2 << std::endl;
@@ -149,7 +149,7 @@ TEST(Polynom, SumFromZeroToUpper) {
 		Polynom pol(p);
 		for(size_t i = 0; i < p; ++i)
 			pol[i] = random.get();
-		const Q res1 = SumFromZeroToUpper::s(pol)(x);
+		const Q res1 = sumFromZeroToUpper(pol)(x);
 		const Q res2 = sumFromZeroToUpperTest(pol,x);
 		ASSERT_EQ(res1, res2);
 	}	
@@ -163,7 +163,7 @@ TEST(Polynom, sumFromZeroToZMinusGamma) {
 		Polynom pol(p);
 		for(size_t i = 0; i < p; ++i)
 			pol[i] = random.get();
-		const Q res1 = sumFromZeroToZMinusGamma(pol,gamma)(x);
+		const Q res1 = sumFromZeroToZMinusGamma(pol,gamma, sumFromZeroToUpper, Binomial::b)(x);
 		const Q res2 = sumFromZeroToUpperTest(pol,x-gamma);
 		ASSERT_EQ(res1, res2);
 	}	

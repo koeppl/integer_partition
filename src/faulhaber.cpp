@@ -17,16 +17,12 @@
  */
 #include "faulhaber.hpp"
 #include "binomial.hpp"
-#include <cassert>
 #include <glog/logging.h>
 #include "bernoulli.hpp"
-
 
 namespace IntervalPartition
 {
 
-static_assert(FAULHABER_DIM+3 < BINOMIAL_DIM, "Faulhaber dimension must be less than Binomial dimension -3");
-const Faulhaber Faulhaber::f(FAULHABER_DIM);
 
 Faulhaber::Faulhaber(size_t _dimension)
 	: dimension(_dimension), polynoms(new Polynom[dimension])

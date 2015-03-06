@@ -67,7 +67,7 @@ void singletest() {
 	constexpr size_t z = 0;
 
 	std::cout << naive_bounds<mpz_class >(bounds, z, 0, bsize-1) << std::endl;
-	IntervalPartition::IntervalledPolynom intervalledPolynom = IntervalPartition::generateIntervalPartition(bounds, bsize);
+	IntervalPartition::IntervalledPolynom intervalledPolynom = IntervalPartition::generateIntervalPartition(bounds, bsize, false);
 	std::cout << intervalledPolynom(z) << std::endl;
 	DCHECK_EQ(intervalledPolynom(z),  naive_bounds<mpz_class >(bounds, z, 0, bsize-1));
 }
@@ -150,7 +150,27 @@ BENCHMARK(CONCATENATE(Roland, s_number), Partition, 10, 10) \
 { \
 	constexpr unsigned int bounds[] = s_bounds ; \
 	constexpr size_t bsize = sizeof(bounds)/sizeof(unsigned int); \
-	celero::DoNotOptimizeAway(IntervalPartition::generateIntervalPartition(bounds, bsize)(s_z)); \
+	celero::DoNotOptimizeAway(IntervalPartition::generateIntervalPartition(bounds, bsize, false)(s_z)); \
+} \
+\
+BENCHMARK(CONCATENATE(Roland, s_number), PartitionMirror, 10, 10) \
+{ \
+	constexpr unsigned int bounds[] = s_bounds ; \
+	constexpr size_t bsize = sizeof(bounds)/sizeof(unsigned int); \
+	celero::DoNotOptimizeAway(IntervalPartition::generateIntervalPartition(bounds, bsize, true)(s_z)); \
+} \
+\
+BENCHMARK(CONCATENATE(Roland, s_number), PartitionParallel, 10, 10) \
+{ \
+	constexpr unsigned int bounds[] = s_bounds ; \
+	constexpr size_t bsize = sizeof(bounds)/sizeof(unsigned int); \
+	celero::DoNotOptimizeAway(IntervalPartition::generateParallelIntervalPartition(bounds, bsize, false)(s_z)); \
+}\
+BENCHMARK(CONCATENATE(Roland, s_number), PartitionParallelMirror, 10, 10) \
+{ \
+	constexpr unsigned int bounds[] = s_bounds ; \
+	constexpr size_t bsize = sizeof(bounds)/sizeof(unsigned int); \
+	celero::DoNotOptimizeAway(IntervalPartition::generateParallelIntervalPartition(bounds, bsize, true)(s_z)); \
 } 
 
 

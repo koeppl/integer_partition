@@ -16,18 +16,16 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <cassert>
 #include "binomial.hpp"
 #include "glog/logging.h"
 
 namespace IntervalPartition {
 
-const Binomial Binomial::b(BINOMIAL_DIM);
 
 
 const Z& Binomial::operator()(size_t i, size_t j) const {
 	DCHECK_LT(i,  dimension);
-	if(j > i) return zero;
+	if(j > i) return Z_zero;
 	return binomials[i][j];
 }
 
