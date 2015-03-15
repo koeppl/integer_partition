@@ -397,7 +397,7 @@ void PiecedPolyAsync::swap(PiecedPolyAsync& o) {
 			LOG(INFO) << "_old_intervals: " << intervalbounds;
 		}
 
-		constexpr size_t numthreads = 4;
+		constexpr size_t numthreads = 3;
 		std::thread threads[numthreads];
 		std::mutex queueMutex;
 		auto safePop = [&] () { 
