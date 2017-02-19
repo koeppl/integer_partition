@@ -8,8 +8,13 @@ It is an enhanced version supporting parallel execution.
 
 # Goal
 
-The goal is to compute all possible partitions of a given integer `z` as a sum of an ordered sequence of `n` integers,
-with the restriction that each integer of the sequence has an individual upper bound.
+The goal is an enhanced version of the classical urn problem: 
+
+> In how many ways can we distribute `z` indistinguishable balls into `n` distinguishable urns?
+We restrict each urn to have a specific size.
+In other terms:
+> The goal is to compute all possible partitions of a given integer `z` as a sum of an ordered sequence of `n` integers,
+> with the restriction that each integer of the sequence has an individual upper bound.
 
 # Dependencies
 
@@ -24,7 +29,6 @@ with the restriction that each integer of the sequence has an individual upper b
 
 # Installation
 
-Use cmake to compile and install the integer-partition package.
 This package ships as a library with a test program.
 Invoke `cmake` and `make` to compile, `make test` to test the compilation.
 
