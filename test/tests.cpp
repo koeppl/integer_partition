@@ -103,8 +103,8 @@ int main(int argc, char **argv)
 		run_celero();
 		return 0;
 	}
-	//singletest();
-	//return 0;
+	singletest();
+	return 0;
 //	test_partition();
 	return RUN_ALL_TESTS();
 }
