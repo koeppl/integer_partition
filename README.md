@@ -22,13 +22,13 @@ with the restriction that each integer of the sequence has an individual upper b
   - gtest
   - gflags
 
-== Installation ==
+# Installation
 
 Use cmake to compile and install the integer-partition package.
 This package ships as a library with a test program.
 Invoke `cmake` and `make` to compile, `make test` to test the compilation.
 
-== Demo ==
+# Demo
 
 After compilation, a test program is located at `demo/integer_partition_demo`.
 This program can be used to compute the number of distributions of n balls into m urns with constrained capacities `i_1,...,i_m`.
