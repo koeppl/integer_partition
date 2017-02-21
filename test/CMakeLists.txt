@@ -8,7 +8,7 @@
 
 include_directories (${integer_partition_SOURCE_DIR}/src) 
 link_directories (${integer_partition_BINARY_DIR}/src) 
-add_executable  (intervaltest tests.cpp celero.cpp basic_tests.cpp partition_tests.cpp bin2.cpp) #newpartition.cpp parallelpartition.cpp)
+add_executable  (intervaltest tests.cpp basic_tests.cpp partition_tests.cpp bin2.cpp) #newpartition.cpp parallelpartition.cpp)
 target_link_libraries  (intervaltest ${GTEST_LIBRARY})
 target_link_libraries  (intervaltest ${GFLAGS_LIBRARY})
 target_link_libraries  (intervaltest ${GLOG_LIBRARY})
@@ -18,6 +18,12 @@ target_link_libraries (intervaltest pthread)
 enable_testing()
 add_test(NAME intervaltest COMMAND intervaltest)
 
+add_executable  (benchmark benchmark.cpp celero.cpp)
+target_link_libraries (benchmark ${GFLAGS_LIBRARY})
+target_link_libraries (benchmark ${GLOG_LIBRARY})
+target_link_libraries (benchmark integer_partition)
+target_link_libraries (benchmark celero)
+target_link_libraries (benchmark pthread)
 
 if( CODE_COVERAGE )                                                                                                                                            
 SETUP_TARGET_FOR_COVERAGE(test_cov intervaltest coverage)

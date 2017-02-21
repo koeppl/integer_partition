@@ -82,12 +82,12 @@ namespace IntervalPartition
 					DCHECK_LE(witness_left_index, intervalbounds.size());
 					DCHECK_GT(witness_left_index, 0);
 					const IB& current_intervalbound = intervalbounds[witness_left_index-1]; //!
-					LOG(INFO) << "Intervalbound: " << current_intervalbound;
+					DVLOG(2) << "Intervalbound: " << current_intervalbound;
 					const Polynom& toSum = intervalledPolynom.at(current_intervalbound);
 					const Polynom& upper = SumFromZeroToUpper(toSum);
 					const Polynom lower = sumFromZeroToZMinusGamma(toSum, dimensional_upper_bound+1, SumFromZeroToUpper, Binomial::b);
 					Polynom together = upper - lower;
-					LOG(INFO) << "Together Sum: " << together;
+					DVLOG(2) << "Together Sum: " << together;
 					return together;
 				} else {
 					/**
@@ -104,11 +104,11 @@ namespace IntervalPartition
 							return lower_sum_pol;
 						}
 						const IB& lower_sum_intervalbound = intervalbounds[witness_left_index-1]; //!
-						LOG(INFO) << "Lower Interval: " << lower_sum_intervalbound;
+						DVLOG(2) << "Lower Interval: " << lower_sum_intervalbound;
 						Polynom lower_sum_pol = sumFromZMinusGammaToUpper(intervalledPolynom.at(lower_sum_intervalbound), dimensional_upper_bound, lower_sum_intervalbound, SumFromZeroToUpper, Binomial::b);
 						return lower_sum_pol;
 					}());
-					LOG(INFO) << "Lower Sum: " << lower_sum;
+					DVLOG(2) << "Lower Sum: " << lower_sum;
 					
 					/**
 					 * Let:
@@ -137,7 +137,7 @@ namespace IntervalPartition
 						DCHECK_EQ(const_sumq.get_den(), 1);
 						return const_sumq.get_num();
 					}() : 0;
-					LOG(INFO) << "Constant Sum: " << const_sum;
+					DVLOG(2) << "Constant Sum: " << const_sum;
 					DCHECK_GE(const_sum, 0) << "Constant Sum is Negative!"; // Invariant: polynomial is non-negative
 
 
@@ -155,24 +155,24 @@ namespace IntervalPartition
 							return upper_sum_pol;
 						}
 						const IB& upper_sum_intervalupper_bound = intervalbounds[witness_right_index-1]; //!
-						LOG(INFO) << "Upper Interval: " << upper_sum_intervalupper_bound;
+						DVLOG(2) << "Upper Interval: " << upper_sum_intervalupper_bound;
 						Polynom upper_sum_pol = Polynom(SumFromZeroToUpper(intervalledPolynom.at(upper_sum_intervalupper_bound)));
-						LOG(INFO) << "upper_sum_pol pre " << upper_sum_pol;
+						DVLOG(2) << "upper_sum_pol pre " << upper_sum_pol;
 						if(witness_right_index > 1)
 						{
 							const IB& upper_sum_intervallower_bound = intervalbounds[witness_right_index-2];
 							upper_sum_pol[0] -= upper_sum_pol(upper_sum_intervallower_bound);
 						}
-						LOG(INFO) << "upper_sum_pol post " << upper_sum_pol;
+						DVLOG(2) << "upper_sum_pol post " << upper_sum_pol;
 						DCHECK_GE(upper_sum_pol(intervalbounds[witness_right_index-1]), 0) << "Upper Sum is Negative!"; // Invariant: polynomial is non-negative
 						return upper_sum_pol;
 					}());
-					LOG(INFO) << "Upper Sum: " << upper_sum;
+					DVLOG(2) << "Upper Sum: " << upper_sum;
 
 					
 					Polynom together = upper_sum + lower_sum;
 					together[0] += const_sum;
-					LOG(INFO) << "Together Sum: " << together;
+					DVLOG(2) << "Together Sum: " << together;
 					return together;
 				}
 		}
@@ -185,7 +185,7 @@ namespace IntervalPartition
 	 */
 	IntervalledPolynom generateIntervalPartition(const unsigned int* const dimensional_upper_bounds, const size_t dimensions, bool useSymmetry)
 	{
-		LOG(INFO) << "Interval Partitioning started";
+		DVLOG(2) << "Interval Partitioning started";
 #ifndef NDEBUG
 		for(size_t i = 0; i < dimensions; ++i) {
 			DCHECK_GT(dimensional_upper_bounds[i], 0) << "Every dimensional upper bound has to be > 0";
@@ -209,7 +209,7 @@ namespace IntervalPartition
 
 		for(size_t k = 1; k < dimensions; ++k)
 		{
-			LOG(INFO) << "k: " << k;
+			DVLOG(2) << "k: " << k;
 
 			vektor<IB> tmp_intervalbounds; //! in this array the interval bounds of the next round (k+1) will be stored
 			IntervalledPolynom tmp_intervalledPolynom; //! this will be the polynom of the next round (k+1)
@@ -246,7 +246,7 @@ namespace IntervalPartition
 				DCHECK_LE(witness_left_index, intervalbounds.size()+1);
 				DCHECK_LE(witness_right_index, intervalbounds.size()+1);
 
-				LOG(INFO) << "k: " << k << ", i: " << i << ", j: " << j;
+				DVLOG(2) << "k: " << k << ", i: " << i << ", j: " << j;
 				if(i < intervalbounds.size()) {
 					/**
 					 * We are examining intervalbounds[i] and help_intervalbounds[j] and pop
@@ -262,7 +262,7 @@ namespace IntervalPartition
 						if(intervalbound > witness_left + dimensional_upper_bound ) {
 							++witness_left_index;
 						}
-						LOG(INFO) << "Fall 1, addiere " << intervalbound;
+						DVLOG(2) << "Fall 1, addiere " << intervalbound;
 						++i;
 					}
 					else if(intervalbound > help_intervalbound)
@@ -274,7 +274,7 @@ namespace IntervalPartition
 						if(help_intervalbound > witness_left + dimensional_upper_bound) {
 							++witness_left_index;
 						}
-						LOG(INFO) << "Fall 2, addiere " << help_intervalbound;
+						DVLOG(2) << "Fall 2, addiere " << help_intervalbound;
 						++j;
 					}
 					else
@@ -286,7 +286,7 @@ namespace IntervalPartition
 						if(intervalbound > witness_left + dimensional_upper_bound) {
 							++witness_left_index;
 						}
-						LOG(INFO) << "Fall 3, addiere " << intervalbound;
+						DVLOG(2) << "Fall 3, addiere " << intervalbound;
 						++i;
 						++j;
 					}
@@ -301,14 +301,14 @@ namespace IntervalPartition
 					if(help_intervalbound > witness_left + dimensional_upper_bound) {
 						++witness_left_index;
 					}
-					LOG(INFO) << "Fall 4, addiere " << help_intervalbound;
+					DVLOG(2) << "Fall 4, addiere " << help_intervalbound;
 					++j;
 				}
-				LOG(INFO) << "intervalledPolynom: " << intervalledPolynom;
-				LOG(INFO) << "tmp_intervalledPolynom: " << tmp_intervalledPolynom;
-				LOG(INFO) << "Witness: " << "[" << witness_left_index << ", " << witness_right_index << "]";
-				LOG(INFO) << "tmp_intervalbounds: " << tmp_intervalbounds;
-				LOG(INFO) << "intervalbounds: " << intervalbounds;
+				DVLOG(2) << "intervalledPolynom: " << intervalledPolynom;
+				DVLOG(2) << "tmp_intervalledPolynom: " << tmp_intervalledPolynom;
+				DVLOG(2) << "Witness: " << "[" << witness_left_index << ", " << witness_right_index << "]";
+				DVLOG(2) << "tmp_intervalbounds: " << tmp_intervalbounds;
+				DVLOG(2) << "intervalbounds: " << intervalbounds;
 				
 				Polynom toAdd(
 						std::move(
@@ -334,22 +334,25 @@ namespace IntervalPartition
 			intervalbounds.swap(tmp_intervalbounds);
 			intervalledPolynom.swap(tmp_intervalledPolynom);
 
-			LOG(INFO) << "_old_intervals: " << intervalbounds;
+			DVLOG(2) << "_old_intervals: " << intervalbounds;
 		}
-		LOG(INFO) << "Resulting Intervalled Polynom: " << intervalledPolynom;
+		DVLOG(2) << "Resulting Intervalled Polynom: " << intervalledPolynom;
 #ifndef NDEBUG
 		{ // checking for invariants
 			//! \f$ \forall z \le \min(i_1,...,i_n) => intervalledPolynom(z) = (z+n-1 \choose z) \f$
 			const unsigned int& minimalDimensionSize = *(std::min_element(dimensional_upper_bounds, dimensional_upper_bounds+dimensions));
+			Binomial b(dimensions+minimalDimensionSize+1);
 			for(size_t z = 0; z < minimalDimensionSize; ++z) { 
-				DCHECK_EQ(intervalledPolynom(z), Binomial::b(dimensions+z-1, z))  <<
+				DCHECK_EQ(intervalledPolynom(z), b(dimensions+z-1, z))  <<
 					"for very small z, the upper bounds do not pose any constraint to the distribution of z." 
 					"So the result is the same as for the 'bars and stars' problem.";
 			}
-			const size_t& dimensionalSum = std::accumulate(dimensional_upper_bounds, dimensional_upper_bounds+dimensions, static_cast<size_t>(0));
-			for(size_t z = 0; z < dimensionalSum/2; ++z) {
-				DCHECK_EQ(intervalledPolynom(z), intervalledPolynom(dimensionalSum-z)) <<
-					"The solution is axis symmetric wrt. to the sum over all upper bounds.";
+			if(!useSymmetry) { // there is no point to check for symmetry when we build the polygon only for the lower part
+				const size_t& dimensionalSum = std::accumulate(dimensional_upper_bounds, dimensional_upper_bounds+dimensions, static_cast<size_t>(0));
+				for(size_t z = 0; z < dimensionalSum/2; ++z) {
+					DCHECK_EQ(intervalledPolynom(z), intervalledPolynom(dimensionalSum-z)) <<
+						"The solution is axis symmetric wrt. to the sum over all upper bounds.";
+				}
 			}
 		}
 #endif

@@ -86,9 +86,9 @@ TEST_F(IntervalPartitionRandom, ModelCheck) {
 		const auto naive_value = naive_bounds<mpz_class>(bounds, z, 0, bsize-1);
 		const IntervalPartition::IntervalledPolynom intervalledPolynom = IntervalPartition::generateIntervalPartition(bounds, bsize, false);
 
-		std::cout << naive_value << std::endl;
-		std::cout << intervalledPolynom.at(z) << std::endl;
-		std::cout << intervalledPolynom(z) << std::endl;
+		DVLOG(1) << naive_value;
+		DVLOG(1) << intervalledPolynom.at(z);
+		DVLOG(1) << intervalledPolynom(z);
 		ASSERT_EQ(intervalledPolynom(z),  naive_value);
 	}
 }
@@ -116,7 +116,7 @@ TEST_F(IntervalPartitionRandom, MirrorCheck) {
 		IntervalPartition::IntervalledPolynom intervalledPolynom = IntervalPartition::generateIntervalPartition(bounds, bsize, false);
 		IntervalPartition::IntervalledPolynom newPolynom = IntervalPartition::generateIntervalPartition(bounds, bsize, true);
 		const size_t maxdim = std::accumulate(bounds, bounds+bsize,static_cast<size_t>(0));
-		std::cout << "O: " << intervalledPolynom.bounds().size() << "\n" << "N: " << newPolynom.bounds().size() << std::endl;
+		DVLOG(1) << "O: " << intervalledPolynom.bounds().size() << "\n" << "N: " << newPolynom.bounds().size();
 
 		for(size_t i = 0; i < maxdim/2; ++i)
 			ASSERT_EQ(intervalledPolynom(i), newPolynom(i)) << intervalledPolynom << " vs " << newPolynom;
@@ -131,7 +131,17 @@ TEST_F(IntervalPartitionRandom, ParallelCheck) {
 		next();
 		print();
 		IntervalPartition::IntervalledPolynom intervalledPolynom = IntervalPartition::generateIntervalPartition(bounds, bsize,false);
-		IntervalPartition::IntervalledPolynom newPolynom = IntervalPartition::generateParallelIntervalPartition(bounds, bsize,false);
-		ASSERT_TRUE(intervalledPolynom == newPolynom) << intervalledPolynom << " vs " << newPolynom;
+		{
+			IntervalPartition::IntervalledPolynom newPolynom = IntervalPartition::generateParallelIntervalPartition(bounds, bsize,false,1);
+			ASSERT_TRUE(intervalledPolynom == newPolynom) << intervalledPolynom << " vs " << newPolynom;
+		}
+		{
+			IntervalPartition::IntervalledPolynom newPolynom = IntervalPartition::generateParallelIntervalPartition(bounds, bsize,false,2);
+			ASSERT_TRUE(intervalledPolynom == newPolynom) << intervalledPolynom << " vs " << newPolynom;
+		}
+		{
+			IntervalPartition::IntervalledPolynom newPolynom = IntervalPartition::generateParallelIntervalPartition(bounds, bsize,false,3);
+			ASSERT_TRUE(intervalledPolynom == newPolynom) << intervalledPolynom << " vs " << newPolynom;
+		}
 	}
 }

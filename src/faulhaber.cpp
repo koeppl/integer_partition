@@ -36,7 +36,7 @@ Faulhaber::Faulhaber(size_t _dimension)
 		{
 			Q& coeff = polynoms[p][p+1-j];
 			coeff = ( Bernoulli::b[j] * Binomial::b(p+1,j) )  / (p+1);
-	//		std::cout << "(" << p+1 << "," << j << ") " << polynoms[j] << "\n";
+	//		DVLOG(2) << "(" << p+1 << "," << j << ") " << polynoms[j];
 			if(j%2) coeff *= -1;
 		}
 	}

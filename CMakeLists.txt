@@ -28,7 +28,7 @@ SET(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} -L/home/niki/opt/lib" )
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmakemodules")
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -std=gnu++14 -pedantic -ggdb -Wshadow")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -std=gnu++14 -pedantic -Wshadow")
 
 
 find_library(GMP_LIBRARY gmp /usr/lib)
@@ -39,7 +39,6 @@ find_package(GTest REQUIRED)
 include_directories(${GTEST_INCLUDE_DIR})
 find_package (GFlags REQUIRED)
 include_directories (${gflags_INCLUDE_DIR})
-
 
 
 option(CODE_COVERAGE "Set ON to add code coverage compile options" OFF)
@@ -53,14 +52,15 @@ endif()
 option(CODE_PROFILING "Set ON to add profiling compile options" OFF)
 if( CODE_PROFILING )
 	set(CMAKE_BUILD_TYPE "Release")
-	SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -pg" )
+	SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -pg" )
 endif()
 
-if (CMAKE_BUILD_TYPE EQUAL "Release")
+if (CMAKE_BUILD_TYPE STREQUAL "Release")
 	add_definitions(-DGOOGLE_STRIP_LOG=1)
 else()
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -ggdb")
 endif()
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -march=native")
 
 MESSAGE( STATUS "With Code Coverage?: " ${CODE_COVERAGE} )
 MESSAGE( STATUS "With Code Profiling?: " ${CODE_PROFILING} )

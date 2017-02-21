@@ -34,7 +34,7 @@ std::ostream& operator<<(std::ostream& os, const IntervalledPolynom& ip) {
 bool IntervalledPolynom::operator==(IntervalledPolynom& o) {
 	for(size_t i = 0; i < intervalbounds.size(); ++i) {
 		if(intervalbounds != o.intervalbounds) {
-			LOG(INFO) << "intervalbounds not the same: " << intervalbounds[i] << " <-> " << o.intervalbounds[i];
+			DVLOG(2) << "intervalbounds not the same: " << intervalbounds[i] << " <-> " << o.intervalbounds[i];
 			return false;
 		}
 	}
@@ -42,7 +42,7 @@ bool IntervalledPolynom::operator==(IntervalledPolynom& o) {
 		polynoms[i].canonicalize();
 		o.polynoms[i].canonicalize();
 		if(polynoms[i] != o.polynoms[i]) {
-			LOG(INFO) << "Polynoms not the same: " << polynoms[i] << " <-> " << o.polynoms[i];
+			DVLOG(2) << "Polynoms not the same: " << polynoms[i] << " <-> " << o.polynoms[i];
 			return false;
 		}
 	}
@@ -51,14 +51,14 @@ bool IntervalledPolynom::operator==(IntervalledPolynom& o) {
 const Polynom& IntervalledPolynom::at(const IB& point) const
 {
 	if(point < 0) return Polynom::zero;
-	LOG(INFO) <<  "Search " << point << " in " << intervalbounds;
+	DVLOG(2) <<  "Search " << point << " in " << intervalbounds;
 	vektor<IB>::const_iterator it = lower_bound(intervalbounds.begin(), intervalbounds.end(), point);
 	if(it != intervalbounds.end() && *it >= point) {
 		const size_t distance = std::distance(intervalbounds.begin(),it);
-		LOG(INFO) << "Found " << intervalbounds[distance] << "->" << polynoms[distance];
+		DVLOG(2) << "Found " << intervalbounds[distance] << "->" << polynoms[distance];
 		return polynoms[distance];
 	}
-	LOG(INFO) << "Search failed !";
+	DVLOG(2) << "Search failed !";
 	return Polynom::zero;
 }
 

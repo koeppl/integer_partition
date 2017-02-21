@@ -45,10 +45,12 @@ namespace IntervalPartition {
 	IntervalledPolynom generateIntervalPartition(const unsigned int* const dimensional_upper_bounds, const size_t dimensions, bool useSymmetry);
 	/**
 	 * @see generateIntervalPartition
+	 * @param threads number of threads to use 
 	 *
 	 * Parallel Version
 	 */
-	IntervalledPolynom generateParallelIntervalPartition(const unsigned int* const dimensional_upper_bounds, const size_t dimensions, bool useSymmetry);
+	IntervalledPolynom generateParallelIntervalPartition(const unsigned int* const dimensional_upper_bounds, 
+			const size_t dimensions, bool useSymmetry, 	const size_t numthreads = 3);
 
 	/** Internal Usage **/
 	const IB& get_witness(size_t witness_index, const vektor<IB>& intervalbounds);

@@ -1,4 +1,5 @@
 #include <gtest/gtest.h>
+#include <glog/logging.h>
 #include <random>
 
 class IntervalPartitionRandom : public ::testing::Test {
@@ -32,9 +33,10 @@ class IntervalPartitionRandom : public ::testing::Test {
 	size_t get_bsize() const { return bsize; }
 
 	void print() const {
+		std::stringstream ss;
 		for(size_t i = 0; i < bsize; ++i) 
-			std::cout << bounds[i] << ", ";
-		std::cout << z << std::endl;
+			ss << bounds[i] << ", ";
+		DVLOG(1) << ss << z;
 	}
 };
 
