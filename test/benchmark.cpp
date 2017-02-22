@@ -7,6 +7,9 @@
 #include <celero/Celero.h>
 #include "naive.hpp"
 
+namespace google {}
+namespace gflags {}
+
 DEFINE_uint64(threads, 1, "Number of Threads");
 
 int main(int argc, char **argv) {

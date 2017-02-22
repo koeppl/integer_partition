@@ -18,11 +18,9 @@
 #include "interval_partition.hpp"
 #include "sum_from_zero_to_upper.hpp"
 #include "binomial.hpp"
-//#ifndef NDEBUG
-//	#include "prettyprint.hpp"
-//#endif
 #include "util.hpp"
 #include "sum_from_zero_cacher.hpp"
+#include <numeric>
 
 
 namespace IntervalPartition
