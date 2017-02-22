@@ -30,7 +30,7 @@ int main(int argc, char** argv)
 	if(argc < 3)
 	{
 		std::cout << argv[0] << " - calculate the " << std::endl;
-		std::cout << "Usage: " << argv[0] << " n i_0 [i_1 [i_2 [...]]]" << std::endl;
+		std::cout << "Usage: " << argv[0] << " z i_0 [i_1 [i_2 [...]]]" << std::endl;
 		return 1;
 	}
 	const size_t bsize = argc-2;

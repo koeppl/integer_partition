@@ -1,8 +1,10 @@
 #!/bin/bash
-mkdir -p build &&
-	cd build &&
-	cmake .. &&
+mkdir -p release &&
+	cd release &&
+	cmake -DCMAKE_BUILD_TYPE=Release .. &&
 	make &&
-	test/intervaltest
+	test/intervaltest &&
+	ln -sv ../etc/datasets.csv . &&
+../etc/benchmark.sh
 
 

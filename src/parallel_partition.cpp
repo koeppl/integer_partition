@@ -436,7 +436,8 @@ void PiecedPolyAsync::swap(PiecedPolyAsync& o) {
 		DVLOG(2) << "Resulting Intervalled Polynom: " << intervalledPolynom;
 		{ // checking for invariants
 			//! \f$ \forall z \le \min(i_1,...,i_n) => intervalledPolynom(z) = (z+n-1 \choose z) \f$
-			const unsigned int& minimalDimensionSize = *(std::min_element(dimensional_upper_bounds, dimensional_upper_bounds+dimensions));
+			// we use 1000 as an upper bound to limit the memory costs
+			const unsigned int minimalDimensionSize = std::min<unsigned int>(1000, *(std::min_element(dimensional_upper_bounds, dimensional_upper_bounds+dimensions)));
 			Binomial b(dimensions+minimalDimensionSize+1);
 			for(size_t z = 0; z < minimalDimensionSize; ++z) { 
 				DCHECK_EQ(intervalledPolynom(z), b(dimensions+z-1, z))  <<

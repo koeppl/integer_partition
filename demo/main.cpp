@@ -24,34 +24,6 @@
 DEFINE_uint64(threads, 1, "Number of Threads");
 
 
-Q num_int_partition(unsigned int* const bounds, size_t bsize, unsigned long z) {
-	size_t ones = 0; // number of dimensions with size 1
-	for(size_t i = 0; i < bsize; ++i) {
-		if(bounds[i] == 0) return 0;
-		if(bounds[i] == 1) {
-			bounds[i] = bounds[bsize-1];
-			++ones;
-			--bsize;
-			--i;
-		}
-	}
-	const size_t dimensionalSum = std::accumulate(bounds, bounds+bsize, static_cast<size_t>(0));
-	IntervalPartition::IntervalledPolynom intervalledPolynom = FLAGS_threads == 1
-		? IntervalPartition::generateIntervalPartition(bounds, bsize, true)
-		: IntervalPartition::generateParallelIntervalPartition(bounds, bsize, true, FLAGS_threads);
-	if(z > dimensionalSum) {
-		z  = dimensionalSum-z;
-	}
-	if(ones == 0) { 
-		return intervalledPolynom(z);
-	}
-	Q ret = 0;
-	const size_t sum_bound = std::min(z, ones);
-	for(size_t k = 0; k <= sum_bound; ++k) {
-		ret += IntervalPartition::Binomial::b(ones,k) * intervalledPolynom(z-k);
-	}
-	return ret;
-}
 
 int main(int argc, char** argv) {
 	{
@@ -62,7 +34,7 @@ int main(int argc, char** argv) {
 	if(argc < 3)
 	{
 		std::cout << argv[0] << " - calculate the " << std::endl;
-		std::cout << "Usage: " << argv[0] << " n i_0 [i_1 [i_2 [...]]]" << std::endl;
+		std::cout << "Usage: " << argv[0] << " z i_0 [i_1 [i_2 [...]]]" << std::endl;
 		return 1;
 	}
 	const size_t bsize = argc-2;
@@ -71,15 +43,11 @@ int main(int argc, char** argv) {
 	for(size_t i = 2; i < static_cast<size_t>(argc); ++i)
 		bounds[i-2] = strtoul(argv[i], NULL, 10);
 
-	std::cout << num_int_partition(bounds, bsize, z) << std::endl;
+	std::cout << IntervalPartition::number_of_interval_partitions(bounds, bsize, z, FLAGS_threads) << std::endl;
 
 	delete [] bounds;
 	return 0;
 }
-
-//	long sum = 0;
-//	for(size_t i = 0; i < bsize;++i) sum += bounds[i];
-//	std::cout << intervalledPolynom(sum/2) << std::endl;
 
 
 

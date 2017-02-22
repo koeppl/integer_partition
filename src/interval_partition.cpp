@@ -340,7 +340,8 @@ namespace IntervalPartition
 #ifndef NDEBUG
 		{ // checking for invariants
 			//! \f$ \forall z \le \min(i_1,...,i_n) => intervalledPolynom(z) = (z+n-1 \choose z) \f$
-			const unsigned int& minimalDimensionSize = *(std::min_element(dimensional_upper_bounds, dimensional_upper_bounds+dimensions));
+			// we use 1000 as an upper bound to limit the memory costs
+			const unsigned int minimalDimensionSize = std::min<unsigned int>(1000, *(std::min_element(dimensional_upper_bounds, dimensional_upper_bounds+dimensions)));
 			Binomial b(dimensions+minimalDimensionSize+1);
 			for(size_t z = 0; z < minimalDimensionSize; ++z) { 
 				DCHECK_EQ(intervalledPolynom(z), b(dimensions+z-1, z))  <<
@@ -358,6 +359,45 @@ namespace IntervalPartition
 #endif
 		return intervalledPolynom;
 	}
+
+IB number_of_interval_partitions(unsigned int* const bounds, size_t bsize, unsigned long z, size_t threads) {
+	if(z == 0) return 1; // z=0 is always one valid configuration
+	if(bsize == 0) return 0; // if z>0 but there are no bounds, there is no valid configuration
+	size_t ones = 0; // number of dimensions with size 1
+	for(size_t i = 0; i < bsize; ++i) {
+		if(bounds[i] == 0) return 0;
+		if(bounds[i] == 1) {
+			bounds[i] = bounds[bsize-1];
+			++ones;
+			--bsize;
+			--i;
+		}
+	}
+	if(bsize == 0) {
+		return IntervalPartition::Binomial::b(ones,z);
+	}
+	IntervalPartition::IntervalledPolynom intervalledPolynom = threads == 1
+		? IntervalPartition::generateIntervalPartition(bounds, bsize, true)
+		: IntervalPartition::generateParallelIntervalPartition(bounds, bsize, true, threads);
+	const size_t dimensionalSum = std::accumulate(bounds, bounds+bsize, static_cast<size_t>(0))+ones;
+	if(z > dimensionalSum/2) {
+		z  = dimensionalSum-z;
+	}
+	if(ones == 0) { 
+		Q ret = intervalledPolynom(z);
+		ret.canonicalize();
+		DCHECK_EQ(ret.get_den(),1);
+		return ret.get_num();
+	}
+	Q ret = 0;
+	const size_t sum_bound = std::min(z, ones);
+	for(size_t k = 0; k <= sum_bound; ++k) {
+		ret += IntervalPartition::Binomial::b(ones,k) * intervalledPolynom(z-k);
+	}
+	ret.canonicalize();
+	DCHECK_EQ(ret.get_den(),1);
+	return ret.get_num();
+}
 
 
 

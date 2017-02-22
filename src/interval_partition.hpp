@@ -32,6 +32,18 @@
  */
 namespace IntervalPartition {
 	/** 
+	 * Computes the number of interval partitions with upper bounds for a target value z
+	 * 
+	 * @param dimensional_upper_bounds The upper bounds. Note that each value has to be strictly larger than 0.
+	 * Otherwise, please drop this dimension!
+	 * @param dimensions The length of dimensional_upper_bounds
+	 * @param z the target value
+	 * @param threads number of threads to spawn. If threads == 1, then it will run the seqential algorithm.
+	 *
+	 */
+	IB number_of_interval_partitions(unsigned int* const dimensional_upper_bounds, size_t dimensions, unsigned long z, size_t threads);
+
+	/** 
 	 * Returns a piecewise-defined polynomial that evaluates for a given integer z the number of partitions of z.
 	 * 
 	 * @param dimensional_upper_bounds The upper bounds. Note that each value has to be strictly larger than 0.
@@ -50,10 +62,11 @@ namespace IntervalPartition {
 	 * Parallel Version
 	 */
 	IntervalledPolynom generateParallelIntervalPartition(const unsigned int* const dimensional_upper_bounds, 
-			const size_t dimensions, bool useSymmetry, 	const size_t numthreads = 3);
+			const size_t dimensions, bool useSymmetry, 	const size_t numthreads);
 
 	/** Internal Usage **/
 	const IB& get_witness(size_t witness_index, const vektor<IB>& intervalbounds);
+
 
 }
 #endif//guard
