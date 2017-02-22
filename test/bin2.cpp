@@ -1,4 +1,6 @@
+#ifndef NO_CELERO
 #include <celero/Celero.h>
+#endif
 #include "binomial.hpp"
 #include <gtest/gtest.h>
 
@@ -50,6 +52,7 @@ const Z& Binomial2::operator()(size_t i, size_t j) const {
 	return binomials[i-1][j];
 }
 
+#ifndef NO_CELERO
 BENCHMARK(Binomial, BinTwo, 10, 10)
 {
     celero::DoNotOptimizeAway(Binomial2(BINOMIAL_DIM));
@@ -67,6 +70,7 @@ BENCHMARK(BinomialAccess, BinTwo, 10, 100)
 		for(size_t j = 0; j < i; ++j)
 			celero::DoNotOptimizeAway(bin(i,j));
 }
+#endif
 
 TEST(Binomial, BinTwo) {
 	Binomial2 bin(BINOMIAL_DIM);
