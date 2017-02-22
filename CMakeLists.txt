@@ -34,6 +34,11 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -std=gnu++14 -pedantic -Ws
 find_library(GMP_LIBRARY gmp /usr/lib)
 find_library(GMPXX_LIBRARY gmpxx /usr/lib)
 find_package(Glog)
+
+find_path(CELERO_INCLUDE_DIR celero/Celero.h)
+if(CELERO_INCLUDE_DIR STREQUAL "CELERO_INCLUDE_DIR-NOTFOUND")
+	add_definitions(-DNO_CELERO=1)
+endif()
 find_package(Threads)
 find_package(GTest REQUIRED)
 include_directories(${GTEST_INCLUDE_DIR})
@@ -62,6 +67,7 @@ else()
 endif()
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -march=native")
 
+MESSAGE( STATUS "With Celero?: " ${CELERO_INCLUDE_DIR} )
 MESSAGE( STATUS "With Code Coverage?: " ${CODE_COVERAGE} )
 MESSAGE( STATUS "With Code Profiling?: " ${CODE_PROFILING} )
 
