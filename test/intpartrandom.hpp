@@ -36,7 +36,7 @@ class IntervalPartitionRandom : public ::testing::Test {
 		std::stringstream ss;
 		for(size_t i = 0; i < bsize; ++i) 
 			ss << bounds[i] << ", ";
-		DVLOG(1) << ss << z;
+		DVLOG(1) << ss.str() << z;
 	}
 };
 

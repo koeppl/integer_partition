@@ -9,6 +9,7 @@
 #define NAIVE_HPP
 
 #include <algorithm>
+#include <numeric>
 #include <cassert>
 #include <glog/logging.h>
 

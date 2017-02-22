@@ -23,6 +23,7 @@
 #include <future>
 #include <iterator>
 #include <queue>
+#include <numeric>
 #include "sum_from_zero_threads.hpp"
 
 namespace IntervalPartition {

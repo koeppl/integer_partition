@@ -24,6 +24,8 @@
 DEFINE_uint64(threads, 1, "Number of Threads");
 
 
+namespace gflags {}
+namespace google {}
 
 int main(int argc, char** argv) {
 	{
