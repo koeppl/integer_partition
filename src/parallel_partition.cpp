@@ -265,7 +265,7 @@ void PiecedPolyAsync::swap(PiecedPolyAsync& o) {
 		// maxdim is only used if useSymmetry to decide the cut-off
 		const size_t maxdim = std::accumulate(dimensional_upper_bounds, dimensional_upper_bounds+dimensions,static_cast<size_t>(0)); 
 		vektor<IB> intervalbounds;
-		SumFromZeroCacherThreadSafe sumcacher; // instead of calling sumFromZeroToUpper each time, we cache its sum.
+		SumFromZeroCacherThreadSafe sumcacher(dimensions); // instead of calling sumFromZeroToUpper each time, we cache its sum.
 		std::function<const Polynom&(const Polynom&)> SumFromZeroToUpper = [&sumcacher] (const Polynom& a) -> const Polynom& { return sumcacher(a);};
 
 		intervalbounds.push_back(dimensional_upper_bounds[0]);
