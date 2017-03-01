@@ -18,8 +18,11 @@ namespace IntervalPartition {
      * **/
     class SumFromZeroCacher
     {
+		public:
+		typedef std::map<Polynom, Polynom> dict_type;
+
         private:
-        std::map<Polynom, Polynom> cache; //!< caches already made queries
+        dict_type cache; //!< caches already made queries
 
         public:
         /**
@@ -30,7 +33,7 @@ namespace IntervalPartition {
                 std::map<Polynom, Polynom>::const_iterator it = cache.find(p);
                 if(it != cache.end()) return it->second;
             }
-            // Create a new polynom
+            // Create a new polynomial
 #ifndef NDEBUG
             auto npair = std::move(cache.emplace(p, std::move(sumFromZeroToUpper(p)) ));
             DCHECK(npair.second);
