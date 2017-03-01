@@ -28,6 +28,7 @@ In other terms:
   - glog
   - gtest
   - gflags
+  - celero (optional)
 
 # Installation
 
