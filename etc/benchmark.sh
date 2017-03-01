@@ -28,40 +28,47 @@ while read line; do
 	z=$(cut -d';' -f$(expr $cols + 1) <<< "$line")
 	bounds=$(cut -d';' -f3-$cols <<< "$line" | sed 's@;@ @g')
 	echo no = $no : typ = $typ : z = $z : bounds = $bounds
+	outexact=0
 	if [[ $typ != 'F' ]]; then
 		zeit=()
-		outs=()
 		for it in $(seq 1 10); do
 			timeA=$(date +%s%3N)
-			outs+=$(timeout 60m ./naive/integer_partition_demo_naive $z $(echo $bounds))
+			outexact=$(timeout 60m ./naive/integer_partition_demo_naive $z $(echo $bounds))
 			timeB=$(date +%s%3N)
 			zeit+=$(expr $timeB - $timeA)
-			[[ $? -eq 124 ]] && break
+			if [[ $? -eq 124 ]]; then
+				outexact=0
+				break
+			fi
 		done
 		printZeit "Naive"
 #		echo $outs
 	fi
-	zeit=()
-	outs=()
-	for it in $(seq 1 10); do
-		timeA=$(date +%s%3N)
-		outs+=$(./demo/integer_partition_demo $z $(echo $bounds))
-		timeB=$(date +%s%3N)
-		zeit+=$(expr $timeB - $timeA)
-	done
-	printZeit "FaulS"
-#	echo $outs
-	outs=()
-	for proc in $(seq 1 $(nproc)); do
+#	zeit=()
+#	outs=()
+#	for it in $(seq 1 10); do
+#		timeA=$(date +%s%3N)
+#		outs+=$(./demo/integer_partition_demo $z $(echo $bounds))
+#		timeB=$(date +%s%3N)
+#		zeit+=$(expr $timeB - $timeA)
+#	done
+#	printZeit "FaulS"
+##	echo $outs
+#	outs=()
+for proc in $(seq 1 $(nproc)); do
 		zeit=()
 		for it in $(seq 1 10); do
 			timeA=$(date +%s%3N)
-			outs+=$(./demo/integer_partition_demo -threads $proc $z $(echo $bounds))
+			out=$(./demo/integer_partition_demo -threads $proc $z $(echo $bounds))
 			timeB=$(date +%s%3N)
 			zeit+=$(expr $timeB - $timeA)
+			if [[ $outexact -gt 0 ]] && [[ $out -ne $outexact ]]; then
+				echo "exact $outexact differs from computed value $out"
+				echo "Call was ./demo/integer_partition_demo -threads $proc $z $(echo $bounds)"
+			fi
 		done
 		printZeit "Faul$proc"
 	done
-#	echo $outs
+	echo $outs
 	
 done < datasets.csv
