@@ -62,7 +62,7 @@ for proc in $(seq 1 $(nproc)); do
 			out=$(./demo/integer_partition_demo -threads $proc $z $(echo $bounds))
 			timeB=$(date +%s%3N)
 			zeit+=$(expr $timeB - $timeA)
-			if [[ $outexact -gt 0 ]] && [[ $out -ne $outexact ]]; then
+			if [[ $outexact -gt 0 ]] && [[ $out != $outexact ]]; then
 				echo "exact $outexact differs from computed value $out"
 				echo "Call was ./demo/integer_partition_demo -threads $proc $z $(echo $bounds)"
 			fi
