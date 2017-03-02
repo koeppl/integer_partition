@@ -53,17 +53,17 @@ const Z& Binomial2::operator()(size_t i, size_t j) const {
 }
 
 #ifndef NO_CELERO
-BENCHMARK(Binomial, BinTwo, 10, 10)
+BENCHMARK(Binomial, BinTwo, 100, 100)
 {
     celero::DoNotOptimizeAway(Binomial2(BINOMIAL_DIM));
 }
-BASELINE(BinomialAccess, Baseline, 10, 100)
+BASELINE(BinomialAccess, Baseline, 100, 100)
 {
 	for(size_t i = 0; i < IntervalPartition::Binomial::b.dimension; ++i)
 		for(size_t j = 0; j < i; ++j)
 			celero::DoNotOptimizeAway(IntervalPartition::Binomial::b(i,j));
 }
-BENCHMARK(BinomialAccess, BinTwo, 10, 100)
+BENCHMARK(BinomialAccess, BinTwo, 100, 100)
 {
 	Binomial2 bin(BINOMIAL_DIM);
 	for(size_t i = 0; i < IntervalPartition::Binomial::b.dimension; ++i)
