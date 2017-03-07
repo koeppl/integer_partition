@@ -9,8 +9,8 @@
 namespace google {}
 namespace gflags {}
 
-//DEFINE_uint64(threads, std::thread::hardware_concurrency() == 0 ? 1 : std::thread::hardware_concurrency(), "Number of Threads");
-DEFINE_uint64(threads, 4, "Number of Threads");
+DEFINE_uint64(threads, std::thread::hardware_concurrency() == 0 ? 1 : std::thread::hardware_concurrency(), "Number of Threads");
+//DEFINE_uint64(threads, 4, "Number of Threads");
 
 CELERO_MAIN
 
