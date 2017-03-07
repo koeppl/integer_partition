@@ -34,12 +34,10 @@ while read line; do
 		for it in $(seq 1 10); do
 			timeA=$(date +%s%3N)
 			outexact=$(timeout 60m ./naive/integer_partition_demo_naive $z $(echo $bounds))
+			[[ $? -eq 124 ]] && outexact=0
 			timeB=$(date +%s%3N)
 			zeit+=$(expr $timeB - $timeA)
-			if [[ $? -eq 124 ]]; then
-				outexact=0
-				break
-			fi
+			[[ "$outexact" = "0" ]] && break
 		done
 		printZeit "Naive"
 #		echo $outs
