@@ -1,0 +1,24 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Köppl"
+  given-names: "Dominik"
+  orcid: "http://orcid.org/0000-0002-8721-4444"
+title: "Computational Aspects of Ordered Integer Partition with Bounds"
+url: "https://github.com/koeppl/integer_partition"
+preferred-citation:
+  type: article
+  authors:
+  - family-names: "Glück"
+    given-names: "Roland"
+  - family-names: "Köppl"
+    given-names: "Dominik"
+    orcid: "http://orcid.org/0000-0002-8721-4444"
+  doi: 10.1007/s00453-020-00713-7
+  journal: "Algorithmica"
+  start: 2955  # First page number
+  end: 2984 # Last page number
+  title: "Computational Aspects of Ordered Integer Partition with Bounds"
+  year: 2020
+  issue: 10
+  volume: 82
